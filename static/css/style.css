@@ -1,0 +1,170 @@
+:root {
+    --bg-dark: #001524;
+    --bg-card: #001b2e;
+    --accent-cyan: #00a8cc;
+    --accent-glow: rgba(0, 168, 204, 0.3);
+    --text-main: #e0f7fa;
+    --text-dim: #8ab4b9;
+    --border-color: #004e64;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    overflow: hidden;
+}
+
+.ad-window {
+    width: 700px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--accent-cyan);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5), 0 0 10px var(--accent-glow);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+}
+
+.ad-header {
+    padding: 10px 15px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ad-header-title {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.ad-content {
+    padding: 25px 35px;
+    flex-grow: 1;
+}
+
+.ad-footer {
+    padding: 15px 35px;
+    border-top: 1px solid var(--border-color);
+    background-color: rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* Form Elements Style */
+.form-label {
+    color: var(--text-main);
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+}
+
+.form-control, .form-select {
+    background-color: transparent !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+    border-radius: 2px;
+    font-size: 0.9rem;
+    padding: 6px 10px;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--accent-cyan) !important;
+    box-shadow: 0 0 5px var(--accent-glow) !important;
+    outline: none;
+}
+
+.form-control::placeholder {
+    color: #334e5e;
+}
+
+/* Buttons */
+.btn-ad {
+    background-color: #2c3e50;
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    min-width: 90px;
+    font-size: 0.85rem;
+    padding: 5px 15px;
+    border-radius: 2px;
+    transition: all 0.2s;
+}
+
+.btn-ad:hover {
+    border-color: var(--accent-cyan);
+    background-color: #34495e;
+    color: white;
+}
+
+.btn-ad.primary {
+    background-color: #3a506b;
+    border-color: var(--accent-cyan);
+}
+
+.btn-ad.primary:hover {
+    background-color: var(--accent-cyan);
+    color: var(--bg-dark);
+}
+
+/* User Icon Mockup */
+.user-avatar-container {
+    width: 70px;
+    height: 70px;
+    border: 1px solid var(--accent-cyan);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 20px;
+    background: linear-gradient(135deg, rgba(0,168,204,0.1) 0%, rgba(0,0,0,0) 100%);
+}
+
+.user-avatar-svg {
+    width: 45px;
+    height: 45px;
+    fill: none;
+    stroke: var(--accent-cyan);
+    stroke-width: 1.5;
+}
+
+.info-text {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+}
+
+.domain-badge {
+    background-color: #1a3a4a;
+    border: 1px solid var(--border-color);
+    padding: 6px 12px;
+    color: var(--text-main);
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+/* Flash messages override */
+.flash-container {
+    position: fixed;
+    top: 20px;
+    width: 100%;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+}
+
+.alert {
+    max-width: 500px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--accent-cyan);
+    color: var(--text-main);
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
