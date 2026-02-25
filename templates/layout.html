@@ -95,7 +95,9 @@
                     {% block content %}{% endblock %}
                 </div>
 
-                {% block footer %}{% endblock %}
+                <div class="ad-footer-container">
+                    {% block footer %}{% endblock %}
+                </div>
             </div>
         </main>
     </div>
@@ -121,9 +123,11 @@
                 <div class="ad-header-title">Portal AD - Login</div>
             </div>
             <div class="ad-content">
-                {% block login_content %}{% block content %}{% endblock %}{% endblock %}
+                {% block login_content %}{% endblock %}
             </div>
-            {% block login_footer %}{% block footer %}{% endblock %}{% endblock %}
+            <div class="ad-footer-container">
+                {% block login_footer %}{% endblock %}
+            </div>
         </div>
     </div>
     {% endif %}
