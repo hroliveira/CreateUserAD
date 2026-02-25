@@ -105,7 +105,7 @@
       </div>
 
       <!-- Additional Details Card -->
-      <div class="bg-surface border border-border rounded-lg p-6 space-y-4">
+      <div class="bg-surface border border-border rounded-lg p-6 space-y-4 shadow-lg">
         <h3 class="text-xs font-mono font-bold text-white uppercase tracking-[0.2em] flex items-center gap-2 mb-2">
           <span class="h-px w-4 bg-primary/50"></span>
           Account Metadata
@@ -113,12 +113,15 @@
         <div class="space-y-3">
           <div class="flex justify-between items-center py-2 border-b border-border/50">
             <span class="text-xs text-muted">Created Date</span>
-            <span class="text-xs font-mono text-white">{{ user.created.split(' ')[0] if user.created != 'N/A' else 'N/A'
-              }}</span>
+            <span class="text-xs font-mono text-white">{{ user.created }}</span>
           </div>
           <div class="flex justify-between items-center py-2 border-b border-border/50">
             <span class="text-xs text-muted">Object GUID</span>
             <span class="text-[10px] font-mono text-muted truncate ml-4" title="{{ user.guid }}">{{ user.guid }}</span>
+          </div>
+          <div class="flex justify-between items-center py-2 border-b border-border/50">
+            <span class="text-xs text-muted">Country Code</span>
+            <span class="text-xs font-mono text-white">{{ user.country_code }}</span>
           </div>
         </div>
       </div>
@@ -127,7 +130,7 @@
     <!-- Main Column: Attributes & Groups -->
     <div class="lg:col-span-8 space-y-6">
       <!-- Tabs Navigation -->
-      <div class="bg-surface border border-border rounded-lg overflow-hidden flex flex-col min-h-[600px]">
+      <div class="bg-surface border border-border rounded-lg overflow-hidden flex flex-col min-h-[600px] shadow-lg">
         <div class="flex items-center px-6 pt-2 border-b border-border bg-background-dark/20">
           <button onclick="tabSwitch('attributes')" id="tabBtn-attributes"
             class="px-6 py-4 text-xs font-bold uppercase tracking-widest transition-all border-b-2 text-primary border-primary">
@@ -145,85 +148,164 @@
         </div>
 
         <!-- Attributes Panel -->
-        <div id="tab-attributes" class="tab-content p-8 space-y-12 block">
+        <div id="tab-attributes" class="tab-content p-8 space-y-10 block">
           <!-- Core Identity -->
-          <div>
-            <h4
-              class="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
-              <span class="size-1.5 bg-primary rounded-full shadow-glow"></span>
-              Core Identity
-            </h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div class="group">
-                <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Display
-                  Name</label>
-                <div
-                  class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
-                  <span class="text-sm text-white font-mono">{{ user.display_name }}</span>
-                  <span
-                    class="material-symbols-outlined text-xs text-muted group-hover:text-primary opacity-0 group-hover:opacity-100 transition-all cursor-pointer">content_copy</span>
-                </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+            <div class="md:col-span-2">
+              <h4
+                class="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
+                <span class="size-1.5 bg-primary rounded-full shadow-glow"></span>
+                Core Identity
+              </h4>
+            </div>
+            <div class="group">
+              <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Display Name</label>
+              <div
+                class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
+                <span class="text-sm text-white font-mono">{{ user.display_name }}</span>
               </div>
-              <div class="group">
-                <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Email
-                  Address</label>
-                <div
-                  class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
-                  <span class="text-sm text-white font-mono">{{ user.mail }}</span>
-                  <span
-                    class="material-symbols-outlined text-xs text-muted group-hover:text-primary opacity-0 group-hover:opacity-100 transition-all cursor-pointer">content_copy</span>
-                </div>
+            </div>
+            <div class="group">
+              <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Username</label>
+              <div
+                class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
+                <span class="text-sm text-white font-mono">{{ user.username }}</span>
               </div>
-              <div class="md:col-span-2 group">
-                <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Distinguished Name
-                  (DN)</label>
-                <div
-                  class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
-                  <span class="text-[10px] text-muted font-mono truncate mr-8">{{ user.dn }}</span>
-                  <span
-                    class="material-symbols-outlined text-xs text-muted group-hover:text-primary opacity-0 group-hover:opacity-100 transition-all cursor-pointer">content_copy</span>
-                </div>
+            </div>
+            <div class="group">
+              <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Comment</label>
+              <div
+                class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
+                <span class="text-sm text-white font-mono">{{ user.comment }}</span>
+              </div>
+            </div>
+            <div class="group">
+              <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">User Comment
+                (Description)</label>
+              <div
+                class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
+                <span class="text-sm text-white font-mono">{{ user.description }}</span>
+              </div>
+            </div>
+            <div class="md:col-span-2 group">
+              <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Distinguished Name
+                (DN)</label>
+              <div
+                class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
+                <span class="text-[10px] text-muted font-mono truncate mr-8">{{ user.dn }}</span>
+                <span
+                  class="material-symbols-outlined text-xs text-muted group-hover:text-primary cursor-pointer">content_copy</span>
               </div>
             </div>
           </div>
 
-          <!-- Organization -->
-          <div>
-            <h4
-              class="text-[10px] font-mono font-bold text-muted uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
-              <span class="size-1.5 bg-muted rounded-full"></span>
-              Organization
-            </h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div class="group">
-                <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Job Title</label>
-                <div
-                  class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
-                  <span class="text-sm text-white font-mono">{{ user.title }}</span>
-                </div>
+          <!-- Account Security -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 pt-6 border-t border-border">
+            <div class="md:col-span-2">
+              <h4
+                class="text-[10px] font-mono font-bold text-error uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
+                <span class="size-1.5 bg-error rounded-full shadow-[0_0_8px_rgba(239,68,68,0.5)]"></span>
+                Security & Password
+              </h4>
+            </div>
+            <div class="group">
+              <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Account
+                Active</label>
+              <div class="flex items-center gap-2 border-b border-border pb-2">
+                <span class="size-2 rounded-full {{ 'bg-success' if not user.is_disabled else 'bg-error' }}"></span>
+                <span class="text-sm text-white font-mono">{{ 'Yes' if not user.is_disabled else 'No' }}</span>
               </div>
-              <div class="group">
-                <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Department</label>
-                <div
-                  class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
-                  <span class="text-sm text-white font-mono">{{ user.department }}</span>
-                </div>
+            </div>
+            <div class="group">
+              <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Account
+                Expires</label>
+              <div
+                class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
+                <span class="text-sm text-white font-mono">{{ user.acc_expires }}</span>
               </div>
-              <div class="group">
-                <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Office
-                  Location</label>
-                <div
-                  class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
-                  <span class="text-sm text-white font-mono">{{ user.office }}</span>
-                </div>
+            </div>
+            <div class="group">
+              <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Password Last
+                Set</label>
+              <div
+                class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
+                <span class="text-sm text-white font-mono">{{ user.pwd_last_set }}</span>
               </div>
-              <div class="group">
-                <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Manager</label>
-                <div
-                  class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
-                  <span class="text-sm text-primary font-mono cursor-pointer hover:underline">{{ user.manager }}</span>
-                  <span class="material-symbols-outlined text-xs text-muted">open_in_new</span>
-                </div>
+            </div>
+            <div class="group">
+              <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Password
+                Expires</label>
+              <div
+                class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
+                <span
+                  class="text-sm {{ 'text-error font-bold' if user.pwd_expires != 'Nunca' else 'text-white' }} font-mono">{{
+                  user.pwd_expires }}</span>
+              </div>
+            </div>
+            <div class="group">
+              <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Password
+                Required</label>
+              <div
+                class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
+                <span class="text-sm text-white font-mono">{{ 'Yes' if user.password_required else 'No' }}</span>
+              </div>
+            </div>
+            <div class="group">
+              <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">User Can Change
+                Password</label>
+              <div
+                class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
+                <span class="text-sm text-white font-mono">{{ 'Yes' if user.can_change_password else 'No' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Technical Settings -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 pt-6 border-t border-border">
+            <div class="md:col-span-2">
+              <h4
+                class="text-[10px] font-mono font-bold text-muted uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
+                <span class="size-1.5 bg-muted rounded-full"></span>
+                Technical Environment
+              </h4>
+            </div>
+            <div class="group">
+              <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Allowed
+                Workstations</label>
+              <div
+                class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
+                <span class="text-sm text-white font-mono">{{ user.workstations }}</span>
+              </div>
+            </div>
+            <div class="group">
+              <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Logon Script</label>
+              <div
+                class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
+                <span class="text-sm text-white font-mono">{{ user.script_path }}</span>
+              </div>
+            </div>
+            <div class="group">
+              <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">User Profile
+                Path</label>
+              <div
+                class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
+                <span class="text-sm text-white font-mono">{{ user.profile_path }}</span>
+              </div>
+            </div>
+            <div class="group">
+              <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Home Directory / Base
+                Folder</label>
+              <div
+                class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
+                <span class="text-sm text-white font-mono">{{ user.home_path }}</span>
+              </div>
+            </div>
+            <div class="group">
+              <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Logon Hours
+                Allowed</label>
+              <div
+                class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
+                <span class="text-sm text-white font-mono">{{ user.logon_hours }}</span>
               </div>
             </div>
           </div>
@@ -246,9 +328,9 @@
             {% for group in user.groups %}
             <div
               class="group flex items-center justify-between bg-surface-highlight/50 border border-border rounded p-3 hover:border-primary/30 transition-all">
-              <div class="flex items-center gap-3">
+              <div class="flex items-center gap-3 overflow-hidden">
                 <div
-                  class="size-8 rounded bg-background-dark flex items-center justify-center text-muted group-hover:text-primary transition-colors">
+                  class="size-8 shrink-0 rounded bg-background-dark flex items-center justify-center text-muted group-hover:text-primary transition-colors">
                   <span class="material-symbols-outlined text-lg">
                     {{ 'security' if 'Admin' in group or 'Domain' in group else 'group' }}
                   </span>

@@ -15,7 +15,8 @@ class Config:
     AD_USER = os.getenv("AD_USER")
     AD_PASSWORD = os.getenv("AD_PASSWORD")
     AD_BASE_DN = os.getenv("AD_BASE_DN")
-    ALLOWED_LOGIN_OU = os.getenv("ALLOWED_LOGIN_OU")
+    _allowed_ou_str = os.getenv("ALLOWED_LOGIN_OU", "")
+    ALLOWED_LOGIN_OU = [ou.strip() for ou in _allowed_ou_str.split(";") if ou.strip()]
 
     # Configurações de Email
     EMAIL_HOST = os.getenv("EMAIL_HOST")

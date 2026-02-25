@@ -178,7 +178,10 @@ def get_user_details(username):
     conn = None
     try:
         conn = get_connection()
-        # Busca o usuário
+        # Determina o Root DN para busca global
+        root_dn = ",".join([f"DC={p}" for p in Config.AD_DOMAIN.split(".")])
+
+        # Busca o usuário em todo o domínio
         search_filter = f"(&(objectClass=user)(sAMAccountName={username}))"
         attributes = [
             "sAMAccountName",
@@ -198,30 +201,64 @@ def get_user_details(username):
             "userAccountControl",
             "lockoutTime",
             "objectGUID",
+            "lastLogonTimestamp",
+            "pwdLastSet",
+            "accountExpires",
+            "userWorkstations",
+            "scriptPath",
+            "profilePath",
+            "homeDirectory",
+            "homeDrive",
+            "countryCode",
+            "logonHours",
+            "comment",
+            "msDS-UserPasswordExpiryTimeComputed",
         ]
-        conn.search(Config.AD_BASE_DN, search_filter, attributes=attributes)
+
+        # Scope SUBTREE é fundamental para encontrar em qualquer OU
+        conn.search(root_dn, search_filter, search_scope=SUBTREE, attributes=attributes)
 
         if len(conn.entries) == 0:
             return None
 
         entry = conn.entries[0]
 
-        # Processa grupos
-        groups = []
-        if hasattr(entry, "memberOf"):
-            # memberOf can be a string or a list
-            member_of = entry.memberOf.value
-            if member_of:
-                if isinstance(member_of, str):
-                    member_of = [member_of]
-                for group_dn in member_of:
-                    cn = str(group_dn).split(",")[0].replace("CN=", "")
-                    groups.append(cn)
+        # Processa grupos (Busca robusta combinando métodos)
+        groups_set = set()
+        user_dn = entry.distinguishedName.value
 
-        # Tenta pegar o grupo primário (ex: Domain Users)
-        # O primaryGroupID é o RID do grupo. O Domain Users é 513 por padrão.
-        if "Domain Users" not in groups:
-            groups.append("Domain Users")  # Fallback comum em AD
+        # Determina o Root DN para busca global de grupos
+        root_dn = ",".join([f"DC={p}" for p in Config.AD_DOMAIN.split(".")])
+
+        # Método 1: Atributo memberOf do usuário
+        if hasattr(entry, "memberOf") and entry.memberOf.value:
+            mo = entry.memberOf.value
+            if isinstance(mo, str):
+                mo = [mo]
+            for g_dn in mo:
+                cn = str(g_dn).split(",")[0].replace("CN=", "")
+                groups_set.add(cn)
+
+        # Método 2: Pesquisa reversa nos grupos (Atributo member) - Busca em todo o domínio
+        try:
+            group_filter = f"(&(objectClass=group)(member={user_dn}))"
+            conn.search(root_dn, group_filter, attributes=["cn"])
+            for g_entry in conn.entries:
+                if hasattr(g_entry, "cn") and g_entry.cn.value:
+                    groups_set.add(str(g_entry.cn.value))
+        except Exception as e:
+            logger.warning(f"Erro na busca reversa de grupos para {username}: {str(e)}")
+
+        groups = sorted(list(groups_set))
+
+        # Tenta incluir o grupo primário se não estiver na lista (Localizado)
+        primary_term = "Usuários do domínio"
+        if not any(
+            g.lower() in [s.lower() for s in groups]
+            for g in ["Domain Users", primary_term]
+        ):
+            groups.append(primary_term)
+            groups.sort()
 
         # Verifica status (Bloqueado/Desativado)
         uac = 512
@@ -246,6 +283,21 @@ def get_user_details(username):
             manager_cn = str(entry.manager.value).split(",")[0].replace("CN=", "")
 
         import uuid
+        import datetime
+
+        def ad_timestamp_to_datetime(val):
+            if not val or val == 0 or str(val) == "0":
+                return "N/A"
+            try:
+                # AD timestamp is 100-nanosecond intervals since Jan 1, 1601
+                # We convert to seconds for datetime
+                seconds = int(val) / 10000000
+                dt = datetime.datetime(1601, 1, 1) + datetime.timedelta(seconds=seconds)
+                # O net user usa o formato local DD/MM/YYYY
+                return dt.strftime("%d/%m/%Y %H:%M:%S")
+            except Exception as e:
+                logger.warning(f"Erro ao converter timestamp AD {val}: {str(e)}")
+                return "N/A"
 
         guid = "N/A"
         if hasattr(entry, "objectGUID") and entry.objectGUID.value is not None:
@@ -260,6 +312,101 @@ def get_user_details(username):
                     f"Erro ao converter GUID para {username}: {str(uuid_err)}"
                 )
                 guid = "N/A"
+
+        # Formata Last Logon (AD tem lastLogon e lastLogonTimestamp)
+        ll_raw = entry.lastLogon.value if hasattr(entry, "lastLogon") else 0
+        lts_raw = (
+            entry.lastLogonTimestamp.value
+            if hasattr(entry, "lastLogonTimestamp")
+            else 0
+        )
+
+        # Pega o mais recente
+        try:
+            last_logon_raw = max(int(ll_raw or 0), int(lts_raw or 0))
+        except:
+            last_logon_raw = ll_raw or lts_raw or 0
+
+        last_logon_fmt = ad_timestamp_to_datetime(last_logon_raw)
+
+        # Datas de senha e conta
+        pwd_last_set_raw = entry.pwdLastSet.value if hasattr(entry, "pwdLastSet") else 0
+        pwd_last_set_fmt = ad_timestamp_to_datetime(pwd_last_set_raw)
+
+        # Password Expiry (msDS-UserPasswordExpiryTimeComputed)
+        pwd_expires_raw = getattr(entry, "msDS-UserPasswordExpiryTimeComputed", 0)
+        if hasattr(pwd_expires_raw, "value"):
+            pwd_expires_raw = pwd_expires_raw.value
+
+        if not pwd_expires_raw or int(str(pwd_expires_raw)) >= 9223372036854775807:
+            pwd_expires_fmt = "Nunca"
+        else:
+            pwd_expires_fmt = ad_timestamp_to_datetime(pwd_expires_raw)
+
+        # Account Expires
+        acc_expires_raw = (
+            entry.accountExpires.value if hasattr(entry, "accountExpires") else 0
+        )
+        if (
+            not acc_expires_raw
+            or int(str(acc_expires_raw)) >= 9223372036854775807
+            or int(str(acc_expires_raw)) == 0
+        ):
+            acc_expires_fmt = "Nunca"
+        else:
+            acc_expires_fmt = ad_timestamp_to_datetime(acc_expires_raw)
+
+        # UAC Flags adicionais
+        password_required = not bool(uac & 32)  # UF_PASSWD_NOTREQD = 32
+        can_change_password = not bool(uac & 64)  # UF_PASSWD_CANT_CHANGE = 64
+
+        # Metadados de Perfil e Sistema
+        workstations = (
+            str(entry.userWorkstations.value)
+            if hasattr(entry, "userWorkstations") and entry.userWorkstations.value
+            else "Todos"
+        )
+        script_path = (
+            str(entry.scriptPath.value)
+            if hasattr(entry, "scriptPath") and entry.scriptPath.value
+            else "N/A"
+        )
+        profile_path = (
+            str(entry.profilePath.value)
+            if hasattr(entry, "profilePath") and entry.profilePath.value
+            else "N/A"
+        )
+        home_directory = (
+            str(entry.homeDirectory.value)
+            if hasattr(entry, "homeDirectory") and entry.homeDirectory.value
+            else "N/A"
+        )
+        home_drive = (
+            str(entry.homeDrive.value)
+            if hasattr(entry, "homeDrive") and entry.homeDrive.value
+            else ""
+        )
+        if home_drive and home_directory != "N/A":
+            home_path = f"{home_drive} -> {home_directory}"
+        else:
+            home_path = home_directory
+
+        country_code = (
+            str(entry.countryCode.value)
+            if hasattr(entry, "countryCode") and entry.countryCode.value
+            else "000 (Padrão)"
+        )
+        comment = (
+            str(entry.comment.value)
+            if hasattr(entry, "comment") and entry.comment.value
+            else "N/A"
+        )
+
+        # O whenCreated já vem como datetime do ldap3 geralmente, mas vamos garantir
+        created_raw = (
+            entry.whenCreated.value if hasattr(entry, "whenCreated") else "N/A"
+        )
+        created_fmt = str(created_raw).split(".")[0] if created_raw != "N/A" else "N/A"
 
         return {
             "username": str(entry.sAMAccountName),
@@ -310,12 +457,21 @@ def get_user_details(username):
             "dn": str(entry.distinguishedName),
             "guid": guid,
             "groups": groups,
-            "created": (
-                str(entry.whenCreated) if hasattr(entry, "whenCreated") else "N/A"
-            ),
-            "last_logon": (
-                str(entry.lastLogon) if hasattr(entry, "lastLogon") else "N/A"
-            ),
+            "created": created_fmt,
+            "last_logon": last_logon_fmt,
+            # Novos campos
+            "pwd_last_set": pwd_last_set_fmt,
+            "pwd_expires": pwd_expires_fmt,
+            "acc_expires": acc_expires_fmt,
+            "password_required": password_required,
+            "can_change_password": can_change_password,
+            "workstations": workstations,
+            "script_path": script_path,
+            "profile_path": profile_path,
+            "home_path": home_path,
+            "country_code": country_code,
+            "comment": comment,
+            "logon_hours": "Todos",  # Simplificado
         }
     except Exception as e:
         logger.error(f"Erro ao obter detalhes de {username}: {str(e)}")
@@ -352,17 +508,23 @@ def authenticate_user(username, password):
             auto_bind=True,
         )
 
-        # Se chegou aqui, a senha está correta. Agora vamos verificar a OU.
+        # Se chegou aqui, a senha está correta. Agora vamos verificar as OUs.
         if Config.ALLOWED_LOGIN_OU:
-            # Busca o DN do usuário autenticado
-            conn.search(
-                Config.ALLOWED_LOGIN_OU,
-                f"(sAMAccountName={username})",
-                search_scope=SUBTREE,
-            )
-            if len(conn.entries) == 0:
+            user_found_in_ou = False
+            for ou in Config.ALLOWED_LOGIN_OU:
+                # Busca o DN do usuário autenticado dentro de cada OU permitida
+                conn.search(
+                    ou,
+                    f"(sAMAccountName={username})",
+                    search_scope=SUBTREE,
+                )
+                if len(conn.entries) > 0:
+                    user_found_in_ou = True
+                    break
+
+            if not user_found_in_ou:
                 logger.warning(
-                    f"Usuário {username} autenticado mas não está na OU permitida."
+                    f"Usuário {username} autenticado mas não está em nenhuma das OUs permitidas."
                 )
                 conn.unbind()
                 return False
