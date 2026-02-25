@@ -16,17 +16,13 @@ class Config:
     AD_PASSWORD = os.getenv("AD_PASSWORD")
     AD_BASE_DN = os.getenv("AD_BASE_DN")
 
-    @property
-    def AD_DOMAIN(self):
-        """Retorna o domínio formatado a partir da Base DN (ex: reisadv.com.br)."""
-        if not self.AD_BASE_DN:
-            return ""
-        parts = [
-            p.split("=")[1]
-            for p in self.AD_BASE_DN.split(",")
-            if p.upper().startswith("DC=")
-        ]
-        return ".".join(parts)
+    # Extrair domínio curto para uso global
+    _parts = [
+        p.split("=")[1]
+        for p in (AD_BASE_DN or "").split(",")
+        if p.upper().startswith("DC=")
+    ]
+    AD_DOMAIN = ".".join(_parts)
 
     # Dicionário de Perfis (Cargo -> Grupos e OUs do AD)
     # Adaptado para a estrutura ReisAdv fornecida

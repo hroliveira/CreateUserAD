@@ -49,14 +49,7 @@ def create_ad_user(first_name, last_name, username, password, profile_key):
         user_dn = f"CN={first_name} {last_name},{profile['ou']}"
         display_name = f"{first_name} {last_name}"
 
-        # Extrai o domínio apenas dos componentes DC= da Base DN
-        domain_parts = [
-            part.split("=")[1]
-            for part in Config.AD_BASE_DN.split(",")
-            if part.upper().startswith("DC=")
-        ]
-        domain = ".".join(domain_parts)
-        user_principal_name = f"{username}@{domain}"
+        user_principal_name = f"{username}@{Config.AD_DOMAIN}"
 
         # 1. Criar o objeto de usuário
         attrs = {
@@ -128,14 +121,7 @@ def authenticate_user(username, password):
             tls=tls_config,
         )
 
-        # Extrai o domínio apenas dos componentes DC= da Base DN
-        domain_parts = [
-            part.split("=")[1]
-            for part in Config.AD_BASE_DN.split(",")
-            if part.upper().startswith("DC=")
-        ]
-        domain = ".".join(domain_parts)
-        user_principal = f"{username}@{domain}"
+        user_principal = f"{username}@{Config.AD_DOMAIN}"
 
         # Tenta a conexão com as credenciais fornecidas
         conn = Connection(
