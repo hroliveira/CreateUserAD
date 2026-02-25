@@ -15,6 +15,15 @@ class Config:
     AD_USER = os.getenv("AD_USER")
     AD_PASSWORD = os.getenv("AD_PASSWORD")
     AD_BASE_DN = os.getenv("AD_BASE_DN")
+    ALLOWED_LOGIN_OU = os.getenv("ALLOWED_LOGIN_OU")
+
+    # Configurações de Email
+    EMAIL_HOST = os.getenv("EMAIL_HOST")
+    EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
+    EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
+    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+    DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
 
     # Extrair domínio curto para uso global
     _parts = [

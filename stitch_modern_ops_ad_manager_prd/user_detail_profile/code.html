@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>User Detail Profile - Modern Ops AD Manager</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00E5FF", // Updated to match PRD Electric Blue
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0A0A0C", // PRD Deep Charcoal
+                        "surface": "#161618", // PRD Surface
+                        "surface-highlight": "#252529",
+                        "border-color": "#333333",
+                        "text-main": "#EDEDEF",
+                        "text-muted": "#85858E",
+                        "success": "#22C55E",
+                        "error": "#EF4444",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "4px",
+                        "sm": "2px",
+                        "md": "6px",
+                        "lg": "8px",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        "glow": "0 0 0 1px rgba(0, 229, 255, 0.1), 0 0 15px -3px rgba(0, 229, 255, 0.1)",
+                        "glow-focus": "0 0 0 2px rgba(0, 229, 255, 0.2)"
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for cyber-deck feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0A0A0C; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333; 
+            border-radius: 2px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555; 
+        }
+        
+        /* Terminal cursor animation */
+        .cursor-blink {
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .glass-panel {
+            background: rgba(22, 22, 24, 0.8);
+            backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-main font-body min-h-screen flex flex-col overflow-x-hidden antialiased">
+<!-- Top Navigation -->
+<header class="border-b border-border-color bg-surface h-16 sticky top-0 z-50">
+<div class="px-6 h-full flex items-center justify-between">
+<!-- Left: Logo & Context -->
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3 text-white">
+<div class="size-8 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-3xl">terminal</span>
+</div>
+<h2 class="text-text-main font-display font-bold text-lg tracking-tight">Modern Ops <span class="text-text-muted font-normal">/ AD Manager</span></h2>
+</div>
+</div>
+<!-- Center: Command Palette Input -->
+<div class="flex-1 max-w-2xl px-8">
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-text-muted text-xl group-focus-within:text-primary transition-colors">search</span>
+</div>
+<input class="block w-full rounded border border-border-color bg-[#0A0A0C] py-2 pl-10 pr-12 text-sm text-text-main font-mono placeholder:text-text-muted focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all shadow-glow-focus" placeholder="&gt; Search users, groups, or type a command..." type="text"/>
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+<kbd class="inline-flex items-center rounded border border-border-color px-2 font-mono text-xs text-text-muted">⌘K</kbd>
+</div>
+</div>
+</div>
+<!-- Right: Actions & Profile -->
+<div class="flex items-center gap-4">
+<button class="relative p-2 text-text-muted hover:text-white transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 block h-2 w-2 rounded-full bg-error ring-2 ring-surface"></span>
+</button>
+<button class="p-2 text-text-muted hover:text-white transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-6 w-px bg-border-color mx-2"></div>
+<div class="flex items-center gap-3 cursor-pointer hover:bg-surface-highlight p-1.5 rounded pr-3 transition-colors border border-transparent hover:border-border-color">
+<div class="size-8 rounded bg-gradient-to-tr from-primary to-blue-600 flex items-center justify-center text-black font-bold font-display text-sm">
+                        AD
+                    </div>
+<div class="hidden md:block text-sm">
+<p class="font-medium leading-none text-text-main">Admin</p>
+<p class="text-xs text-text-muted mt-0.5 font-mono">Tier 2 Support</p>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- Breadcrumb & Page Header -->
+<div class="px-6 py-4 flex items-center justify-between border-b border-border-color bg-[#0A0A0C]">
+<nav aria-label="Breadcrumb" class="flex">
+<ol class="flex items-center space-x-2 font-mono text-sm">
+<li>
+<a class="text-text-muted hover:text-primary transition-colors" href="#">Directory</a>
+</li>
+<li><span class="text-border-color">/</span></li>
+<li>
+<a class="text-text-muted hover:text-primary transition-colors" href="#">Users</a>
+</li>
+<li><span class="text-border-color">/</span></li>
+<li aria-current="page" class="text-primary">jsmith</li>
+</ol>
+</nav>
+<div class="flex gap-3">
+<span class="flex items-center gap-2 px-3 py-1 rounded bg-surface border border-border-color text-xs font-mono text-text-muted">
+<span class="block size-2 rounded-full bg-success animate-pulse"></span>
+                System Online
+            </span>
+</div>
+</div>
+<!-- Main Content Grid -->
+<main class="flex-1 p-6 overflow-y-auto">
+<div class="mx-auto max-w-[1400px]">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+<!-- LEFT COLUMN: Profile Summary Card (30%) -->
+<div class="lg:col-span-4 flex flex-col gap-6">
+<!-- Identity Card -->
+<div class="bg-surface border border-border-color rounded-lg overflow-hidden relative">
+<!-- Decorative top accent -->
+<div class="h-1 w-full bg-gradient-to-r from-error via-error to-surface-highlight"></div>
+<div class="p-6 flex flex-col items-center text-center border-b border-border-color relative">
+<!-- Status Indicator Absolute -->
+<div class="absolute top-4 right-4">
+<span class="inline-flex items-center rounded-full bg-error/10 px-2.5 py-0.5 text-xs font-medium text-error ring-1 ring-inset ring-error/20 font-mono tracking-wide">
+<span class="mr-1.5 h-1.5 w-1.5 rounded-full bg-error animate-pulse"></span>
+                                    LOCKED
+                                </span>
+</div>
+<div class="relative mb-4 group cursor-pointer">
+<div class="size-24 rounded-full bg-surface-highlight border-2 border-error p-1 relative overflow-hidden">
+<div class="w-full h-full rounded-full bg-cover bg-center" data-alt="Portrait of John Smith, user profile" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBNWt8upaaJDUN_VNG8QRfnD-zUgCiV42G1syHjqXuT-6hsluTlv5DLR6fXKXW9wnDdy3BS3zV0OkWMsT1twkMlnvChb6EEfdim0HoafkjoP6wESx60ndFa7vbiUMS7QT42hAjOCf6RFx4dPjruXXnXxUfK2xMfzqveR61YVokLWg6E_SGEm0jARW5AgKoQUJdVL9Rs-TGA171fBpCxPK5zCbO5T1tS-CeRJFsXc6HmDSrcBRo-AGHXdldXd8EAxkHxEmRwRR9tJLrS');"></div>
+</div>
+<div class="absolute bottom-0 right-0 bg-surface border border-border-color rounded-full p-1.5 text-text-muted hover:text-white transition-colors">
+<span class="material-symbols-outlined text-sm block">edit</span>
+</div>
+</div>
+<h1 class="text-2xl font-display font-bold text-white mb-1">John Smith</h1>
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-text-muted text-sm">badge</span>
+<code class="text-sm font-mono text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">CORP\jsmith</code>
+</div>
+<div class="grid grid-cols-2 gap-4 w-full mt-2 pt-4 border-t border-border-color">
+<div class="flex flex-col">
+<span class="text-xs text-text-muted uppercase tracking-wider mb-1">Last Logon</span>
+<span class="text-sm font-mono text-white">2023-10-24 08:42</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs text-text-muted uppercase tracking-wider mb-1">Pwd Age</span>
+<span class="text-sm font-mono text-white">42 days</span>
+</div>
+</div>
+</div>
+<!-- Action Grid -->
+<div class="p-4 bg-[#0A0A0C]">
+<div class="grid grid-cols-2 gap-3">
+<button class="group flex flex-col items-center justify-center gap-2 p-3 rounded border border-error bg-error/5 hover:bg-error/10 transition-all text-error">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">lock_open</span>
+<span class="text-xs font-bold font-display uppercase tracking-wide">Unlock Account</span>
+</button>
+<button class="group flex flex-col items-center justify-center gap-2 p-3 rounded border border-border-color bg-surface hover:bg-surface-highlight hover:border-primary/50 hover:text-primary transition-all text-text-muted">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">key</span>
+<span class="text-xs font-bold font-display uppercase tracking-wide">Reset Password</span>
+</button>
+<button class="group flex flex-col items-center justify-center gap-2 p-3 rounded border border-border-color bg-surface hover:bg-surface-highlight hover:border-text-main transition-all text-text-muted">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">block</span>
+<span class="text-xs font-bold font-display uppercase tracking-wide">Disable</span>
+</button>
+<button class="group flex flex-col items-center justify-center gap-2 p-3 rounded border border-border-color bg-surface hover:bg-surface-highlight hover:border-text-main transition-all text-text-muted">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">move_group</span>
+<span class="text-xs font-bold font-display uppercase tracking-wide">Move OU</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Quick Stats / Health -->
+<div class="bg-surface border border-border-color rounded-lg p-5">
+<h3 class="text-sm font-display font-bold text-text-muted uppercase tracking-wider mb-4 border-b border-border-color pb-2">Account Health</h3>
+<div class="space-y-4">
+<div class="flex justify-between items-center text-sm">
+<span class="text-text-muted flex items-center gap-2"><span class="material-symbols-outlined text-base">password</span> Password Expiry</span>
+<span class="font-mono text-success">48 Days</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-text-muted flex items-center gap-2"><span class="material-symbols-outlined text-base">warning</span> Bad Pwd Count</span>
+<span class="font-mono text-error font-bold">5</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-text-muted flex items-center gap-2"><span class="material-symbols-outlined text-base">folder_shared</span> Home Drive</span>
+<span class="font-mono text-text-main text-xs">\\fs01\home\jsmith</span>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN: Tabbed Interface (70%) -->
+<div class="lg:col-span-8 flex flex-col gap-0 bg-surface border border-border-color rounded-lg min-h-[600px]">
+<!-- Tabs Header -->
+<div class="flex items-center px-6 pt-2 border-b border-border-color bg-[#0A0A0C]">
+<button class="px-4 py-3 text-sm font-medium font-display text-primary border-b-2 border-primary hover:text-primary transition-colors">
+                            Attributes
+                        </button>
+<button class="px-4 py-3 text-sm font-medium font-display text-text-muted border-b-2 border-transparent hover:text-text-main hover:border-border-color transition-colors">
+                            Groups <span class="ml-1 text-xs bg-surface-highlight text-text-muted px-1.5 py-0.5 rounded-full font-mono">12</span>
+</button>
+<button class="px-4 py-3 text-sm font-medium font-display text-text-muted border-b-2 border-transparent hover:text-text-main hover:border-border-color transition-colors">
+                            Devices
+                        </button>
+<button class="px-4 py-3 text-sm font-medium font-display text-text-muted border-b-2 border-transparent hover:text-text-main hover:border-border-color transition-colors">
+                            Logs
+                        </button>
+<!-- Tab Actions -->
+<div class="ml-auto flex items-center gap-2 pb-1">
+<button class="p-1.5 text-text-muted hover:text-primary transition-colors" title="Refresh Data">
+<span class="material-symbols-outlined text-lg">refresh</span>
+</button>
+<button class="p-1.5 text-text-muted hover:text-primary transition-colors" title="Export JSON">
+<span class="material-symbols-outlined text-lg">download</span>
+</button>
+</div>
+</div>
+<!-- Tab Content Area -->
+<div class="p-6 flex-1 bg-surface">
+<!-- Attributes Section -->
+<div class="space-y-8">
+<!-- Section: Core Identity -->
+<div>
+<h4 class="text-xs font-bold text-text-muted uppercase tracking-widest mb-4 flex items-center gap-2">
+<span class="w-2 h-2 bg-primary rounded-sm"></span> Core Identity
+                                </h4>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+<div class="group relative">
+<label class="block text-xs text-text-muted mb-1 font-medium">First Name</label>
+<div class="flex items-center justify-between border-b border-border-color pb-1 group-hover:border-primary/50 transition-colors cursor-pointer">
+<span class="text-sm text-text-main font-mono">John</span>
+<span class="material-symbols-outlined text-[10px] opacity-0 group-hover:opacity-100 text-primary transition-opacity">content_copy</span>
+</div>
+</div>
+<div class="group relative">
+<label class="block text-xs text-text-muted mb-1 font-medium">Last Name</label>
+<div class="flex items-center justify-between border-b border-border-color pb-1 group-hover:border-primary/50 transition-colors cursor-pointer">
+<span class="text-sm text-text-main font-mono">Smith</span>
+<span class="material-symbols-outlined text-[10px] opacity-0 group-hover:opacity-100 text-primary transition-opacity">content_copy</span>
+</div>
+</div>
+<div class="group relative">
+<label class="block text-xs text-text-muted mb-1 font-medium">Display Name</label>
+<div class="flex items-center justify-between border-b border-border-color pb-1 group-hover:border-primary/50 transition-colors cursor-pointer">
+<span class="text-sm text-text-main font-mono">John Smith</span>
+<span class="material-symbols-outlined text-[10px] opacity-0 group-hover:opacity-100 text-primary transition-opacity">content_copy</span>
+</div>
+</div>
+<div class="group relative">
+<label class="block text-xs text-text-muted mb-1 font-medium">Email Address</label>
+<div class="flex items-center justify-between border-b border-border-color pb-1 group-hover:border-primary/50 transition-colors cursor-pointer">
+<span class="text-sm text-text-main font-mono">john.smith@corp.local</span>
+<span class="material-symbols-outlined text-[10px] opacity-0 group-hover:opacity-100 text-primary transition-opacity">content_copy</span>
+</div>
+</div>
+<div class="group relative md:col-span-2">
+<label class="block text-xs text-text-muted mb-1 font-medium">Description</label>
+<div class="flex items-center justify-between border-b border-border-color pb-1 group-hover:border-primary/50 transition-colors cursor-pointer">
+<span class="text-sm text-text-main font-mono">Senior DevOps Engineer - Cloud Infrastructure Team</span>
+<span class="material-symbols-outlined text-[10px] opacity-0 group-hover:opacity-100 text-primary transition-opacity">content_copy</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Section: Organization -->
+<div>
+<h4 class="text-xs font-bold text-text-muted uppercase tracking-widest mb-4 flex items-center gap-2 mt-2">
+<span class="w-2 h-2 bg-text-muted rounded-sm"></span> Organization
+                                </h4>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+<div class="group relative">
+<label class="block text-xs text-text-muted mb-1 font-medium">Title</label>
+<div class="flex items-center justify-between border-b border-border-color pb-1 group-hover:border-primary/50 transition-colors cursor-pointer">
+<span class="text-sm text-text-main font-mono">Senior Engineer</span>
+<span class="material-symbols-outlined text-[10px] opacity-0 group-hover:opacity-100 text-primary transition-opacity">content_copy</span>
+</div>
+</div>
+<div class="group relative">
+<label class="block text-xs text-text-muted mb-1 font-medium">Department</label>
+<div class="flex items-center justify-between border-b border-border-color pb-1 group-hover:border-primary/50 transition-colors cursor-pointer">
+<span class="text-sm text-text-main font-mono">Engineering</span>
+<span class="material-symbols-outlined text-[10px] opacity-0 group-hover:opacity-100 text-primary transition-opacity">content_copy</span>
+</div>
+</div>
+<div class="group relative">
+<label class="block text-xs text-text-muted mb-1 font-medium">Manager</label>
+<div class="flex items-center justify-between border-b border-border-color pb-1 group-hover:border-primary/50 transition-colors cursor-pointer">
+<span class="text-sm text-primary font-mono underline decoration-dotted decoration-text-muted underline-offset-4 hover:text-white transition-colors">Sarah Connor</span>
+<span class="material-symbols-outlined text-[10px] text-text-muted">open_in_new</span>
+</div>
+</div>
+<div class="group relative">
+<label class="block text-xs text-text-muted mb-1 font-medium">Employee ID</label>
+<div class="flex items-center justify-between border-b border-border-color pb-1 group-hover:border-primary/50 transition-colors cursor-pointer">
+<span class="text-sm text-text-main font-mono">84920</span>
+<span class="material-symbols-outlined text-[10px] opacity-0 group-hover:opacity-100 text-primary transition-opacity">content_copy</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Section: Advanced / System -->
+<div>
+<h4 class="text-xs font-bold text-text-muted uppercase tracking-widest mb-4 flex items-center gap-2 mt-2">
+<span class="w-2 h-2 bg-text-muted rounded-sm"></span> System Attributes
+                                </h4>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+<div class="group relative md:col-span-2">
+<label class="block text-xs text-text-muted mb-1 font-medium">Object GUID</label>
+<div class="flex items-center justify-between border-b border-border-color pb-1 group-hover:border-primary/50 transition-colors cursor-pointer">
+<span class="text-sm text-text-muted font-mono">b7899a12-c4d5-4e6f-a7b8-c9d0e1f2a3b4</span>
+<span class="material-symbols-outlined text-[10px] opacity-0 group-hover:opacity-100 text-primary transition-opacity">content_copy</span>
+</div>
+</div>
+<div class="group relative md:col-span-2">
+<label class="block text-xs text-text-muted mb-1 font-medium">Distinguished Name</label>
+<div class="flex items-center justify-between border-b border-border-color pb-1 group-hover:border-primary/50 transition-colors cursor-pointer">
+<span class="text-sm text-text-muted font-mono truncate">CN=John Smith,OU=Users,OU=Engineering,DC=corp,DC=local</span>
+<span class="material-symbols-outlined text-[10px] opacity-0 group-hover:opacity-100 text-primary transition-opacity">content_copy</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Groups Section Placeholder (Visualized in same view as per single-page constraint, but lower) -->
+<div class="mt-12 pt-8 border-t border-border-color">
+<div class="flex items-center justify-between mb-4">
+<h4 class="text-sm font-display font-bold text-text-main uppercase tracking-wider">Assigned Groups</h4>
+<button class="text-xs text-primary hover:text-white transition-colors flex items-center gap-1 font-bold uppercase tracking-wider">
+<span class="material-symbols-outlined text-sm">add</span> Add Group
+                                </button>
+</div>
+<div class="flex flex-wrap gap-2">
+<!-- Group Tag Item -->
+<div class="group flex items-center gap-2 bg-surface-highlight border border-border-color rounded px-3 py-1.5 text-text-main hover:border-primary/30 transition-colors cursor-default">
+<span class="material-symbols-outlined text-sm text-primary">security</span>
+<span class="text-sm font-mono">Domain Users</span>
+<button class="ml-1 text-text-muted hover:text-error opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+<div class="group flex items-center gap-2 bg-surface-highlight border border-border-color rounded px-3 py-1.5 text-text-main hover:border-primary/30 transition-colors cursor-default">
+<span class="material-symbols-outlined text-sm text-text-muted">group</span>
+<span class="text-sm font-mono">VPN_Users</span>
+<button class="ml-1 text-text-muted hover:text-error opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+<div class="group flex items-center gap-2 bg-surface-highlight border border-border-color rounded px-3 py-1.5 text-text-main hover:border-primary/30 transition-colors cursor-default">
+<span class="material-symbols-outlined text-sm text-text-muted">group</span>
+<span class="text-sm font-mono">jira-users</span>
+<button class="ml-1 text-text-muted hover:text-error opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+<div class="group flex items-center gap-2 bg-surface-highlight border border-border-color rounded px-3 py-1.5 text-text-main hover:border-primary/30 transition-colors cursor-default">
+<span class="material-symbols-outlined text-sm text-success">admin_panel_settings</span>
+<span class="text-sm font-mono">docker-registry-rw</span>
+<button class="ml-1 text-text-muted hover:text-error opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+<div class="group flex items-center gap-2 bg-surface-highlight border border-border-color rounded px-3 py-1.5 text-text-main hover:border-primary/30 transition-colors cursor-default">
+<span class="material-symbols-outlined text-sm text-text-muted">group</span>
+<span class="text-sm font-mono">aws-prod-read</span>
+<button class="ml-1 text-text-muted hover:text-error opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

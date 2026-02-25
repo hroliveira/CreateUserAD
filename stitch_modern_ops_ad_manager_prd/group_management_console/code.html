@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ModernOps - Group Management Console</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0ddff2",
+                        "primary-dark": "#0abccb",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0A0A0C",
+                        "surface": "#161618",
+                        "surface-highlight": "#252529",
+                        "border-subtle": "#333333",
+                        "text-main": "#EDEDEF",
+                        "text-muted": "#85858E",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem", 
+                        "sm": "0.125rem",
+                        "md": "0.375rem",
+                        "lg": "0.5rem", 
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom Scrollbar for the Cyber-deck feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0A0A0C; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555; 
+        }
+
+        /* Checkbox styling override */
+        input[type="checkbox"] {
+            background-color: #161618;
+            border-color: #333;
+            color: #0ddff2;
+        }
+        input[type="checkbox"]:focus {
+            ring-color: #0ddff2;
+            box-shadow: 0 0 0 2px rgba(13, 223, 242, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-text-main font-body min-h-screen flex flex-col overflow-hidden">
+<!-- Top Navigation -->
+<header class="flex-none flex items-center justify-between whitespace-nowrap border-b border-solid border-border-subtle bg-[#102123] px-6 py-3 h-16">
+<div class="flex items-center gap-4 text-white">
+<div class="size-6 text-primary">
+<span class="material-symbols-outlined text-2xl">terminal</span>
+</div>
+<h2 class="text-white text-xl font-display font-bold leading-tight tracking-[-0.015em]">ModernOps</h2>
+</div>
+<!-- Global Command Palette Input Mockup -->
+<div class="hidden md:flex flex-1 max-w-xl mx-8 relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-text-muted text-lg">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-2 border border-border-subtle rounded bg-surface text-sm text-text-main placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono" placeholder="&gt; Search users, groups, or type a command..." type="text"/>
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+<kbd class="hidden sm:inline-block border border-border-subtle rounded px-1 text-[10px] font-mono text-text-muted">CMD+K</kbd>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-6">
+<a class="text-text-muted hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">Command Center</a>
+<a class="text-text-muted hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">Users</a>
+<a class="text-primary text-sm font-medium leading-normal" href="#">Groups</a>
+<a class="text-text-muted hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">Audit Log</a>
+</div>
+<div class="h-8 w-[1px] bg-border-subtle"></div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 border border-border-subtle" data-alt="User Avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAK3olv207nACuSewGwfb0Zh73BJZs4xaiNoE7Z_iqMSG5dw2Ex5uHhAGRE_fPRCTW7nt1upX7qj2RWOxlEwlFq3PB8d6NF7_Iy6bFMGCSn0jImoJKTxvNGFNpez23z5nl8iz-Kgk-3FgKxDlz_9aPyJFnVVCWvT9EzUs1djxW8oGa48IbRa65Tltv0auPXy3QVZ6-O0Ua2knjXZ0vLFuTkvM2YB79l8LdDh6EqGJjWcwiDeB6rIoCKzhN27yhThkt_vK2F-bO_lCfd");'></div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col overflow-hidden">
+<!-- Breadcrumbs & Group Header -->
+<div class="flex-none px-6 pt-4 pb-2">
+<div class="flex items-center gap-2 mb-4 text-sm font-mono">
+<span class="text-text-muted">Groups</span>
+<span class="text-text-muted">/</span>
+<span class="text-text-muted">Security Groups</span>
+<span class="text-text-muted">/</span>
+<span class="text-primary">VPN_Remote_Users</span>
+</div>
+<div class="flex flex-wrap justify-between items-start gap-4 pb-6 border-b border-border-subtle">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-3">
+<h1 class="text-3xl font-display font-bold text-white tracking-tight">VPN_Remote_Users</h1>
+<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">Global Scope</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-surface-highlight text-text-muted border border-border-subtle">Security</span>
+</div>
+<p class="text-text-muted text-sm max-w-3xl">Users authorized for full tunnel VPN access via AnyConnect. Membership syncs to firewall every 15 minutes.</p>
+<div class="flex items-center gap-4 mt-1">
+<div class="flex items-center gap-1.5 text-xs text-text-muted font-mono">
+<span class="material-symbols-outlined text-[14px]">mail</span>
+<span>vpn-users@corp.local</span>
+</div>
+<div class="flex items-center gap-1.5 text-xs text-text-muted font-mono">
+<span class="material-symbols-outlined text-[14px]">badge</span>
+<span>SID: S-1-5-21-362...1023</span>
+</div>
+</div>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 h-9 bg-surface hover:bg-surface-highlight border border-border-subtle text-text-main text-sm font-medium rounded transition-colors">
+<span class="material-symbols-outlined text-[18px]">settings</span>
+<span>Properties</span>
+</button>
+<button class="flex items-center gap-2 px-4 h-9 bg-surface hover:bg-surface-highlight border border-border-subtle text-text-main text-sm font-medium rounded transition-colors">
+<span class="material-symbols-outlined text-[18px]">history</span>
+<span>Audit Logs</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Split Pane Management Console -->
+<div class="flex-1 flex min-h-0 px-6 pb-6 gap-4">
+<!-- LEFT PANE: Current Members -->
+<div class="flex-1 flex flex-col bg-surface border border-border-subtle rounded-md overflow-hidden shadow-sm">
+<!-- Pane Header -->
+<div class="flex-none p-3 border-b border-border-subtle bg-[#1a1a1d] flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">group</span>
+<h3 class="font-display font-semibold text-sm">Current Members <span class="text-text-muted font-mono ml-1 text-xs">(142)</span></h3>
+</div>
+<div class="relative w-48">
+<input class="w-full bg-[#0A0A0C] border border-border-subtle rounded px-2 py-1 text-xs text-text-main focus:border-primary focus:outline-none" placeholder="Filter members..." type="text"/>
+<span class="material-symbols-outlined absolute right-2 top-1.5 text-text-muted text-[14px]">filter_list</span>
+</div>
+</div>
+<!-- Pane Content (Scrollable List) -->
+<div class="flex-1 overflow-y-auto p-2">
+<table class="w-full text-left border-collapse">
+<thead class="text-xs text-text-muted font-mono border-b border-border-subtle">
+<tr>
+<th class="pl-2 pr-2 py-2 w-8"><input class="rounded border-border-subtle bg-background-dark focus:ring-0 focus:ring-offset-0 text-primary w-3 h-3" type="checkbox"/></th>
+<th class="px-2 py-2 font-medium">User</th>
+<th class="px-2 py-2 font-medium text-right">Dept</th>
+</tr>
+</thead>
+<tbody class="text-sm">
+<!-- Item 1 -->
+<tr class="group hover:bg-surface-highlight transition-colors border-b border-border-subtle/30 h-12">
+<td class="pl-2 pr-2"><input class="rounded border-border-subtle bg-background-dark focus:ring-0 focus:ring-offset-0 text-primary w-4 h-4" type="checkbox"/></td>
+<td class="px-2">
+<div class="flex items-center gap-3">
+<div class="w-7 h-7 rounded bg-green-900/30 flex items-center justify-center text-green-400 text-xs font-bold border border-green-900/50">SC</div>
+<div class="flex flex-col">
+<span class="text-text-main font-medium leading-none">Sarah Connor</span>
+<span class="text-text-muted text-[11px] font-mono mt-0.5">SKYNET\sconnor</span>
+</div>
+</div>
+</td>
+<td class="px-2 text-right text-xs text-text-muted font-mono">R&amp;D</td>
+</tr>
+<!-- Item 2 (Selected) -->
+<tr class="bg-primary/5 hover:bg-primary/10 transition-colors border-b border-border-subtle/30 h-12 border-l-2 border-l-primary">
+<td class="pl-2 pr-2"><input checked="" class="rounded border-border-subtle bg-background-dark focus:ring-0 focus:ring-offset-0 text-primary w-4 h-4" type="checkbox"/></td>
+<td class="px-2">
+<div class="flex items-center gap-3">
+<div class="w-7 h-7 rounded bg-blue-900/30 flex items-center justify-center text-blue-400 text-xs font-bold border border-blue-900/50">KA</div>
+<div class="flex flex-col">
+<span class="text-text-main font-medium leading-none">Kyle Anderson</span>
+<span class="text-text-muted text-[11px] font-mono mt-0.5">CORP\kanderson</span>
+</div>
+</div>
+</td>
+<td class="px-2 text-right text-xs text-text-muted font-mono">OPS</td>
+</tr>
+<!-- Item 3 (Selected) -->
+<tr class="bg-primary/5 hover:bg-primary/10 transition-colors border-b border-border-subtle/30 h-12 border-l-2 border-l-primary">
+<td class="pl-2 pr-2"><input checked="" class="rounded border-border-subtle bg-background-dark focus:ring-0 focus:ring-offset-0 text-primary w-4 h-4" type="checkbox"/></td>
+<td class="px-2">
+<div class="flex items-center gap-3">
+<img class="w-7 h-7 rounded border border-border-subtle object-cover" data-alt="User Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAl9kbUhpBm2gvxVpJSoFBkRPKw-dmV4ASUbSHkfIjQbstx-eEPq2bDGmo2JwAP956IbSHrlyj0_nzn8_YAvTfCpxMIUteUYU_bQ56kPpmqUJAeKH3LUd0g6vyNg-frYU-veNptUAzq9r5juYL3vmjxYiejzcYfu3KLZR0dLHyiD3GLs5qhYwfIok2WEjb1uj_eVzOquh25ULLr4uwZAeNUDlHGziQqDAte3OyzRf1Xv_nASVa4-C_InO3tIh3THHeQ9Fx2q5aFCOkP"/>
+<div class="flex flex-col">
+<span class="text-text-main font-medium leading-none">Miles Dyson</span>
+<span class="text-text-muted text-[11px] font-mono mt-0.5">CYBER\mdyson</span>
+</div>
+</div>
+</td>
+<td class="px-2 text-right text-xs text-text-muted font-mono">ENG</td>
+</tr>
+<!-- Item 4 -->
+<tr class="group hover:bg-surface-highlight transition-colors border-b border-border-subtle/30 h-12">
+<td class="pl-2 pr-2"><input class="rounded border-border-subtle bg-background-dark focus:ring-0 focus:ring-offset-0 text-primary w-4 h-4" type="checkbox"/></td>
+<td class="px-2">
+<div class="flex items-center gap-3">
+<div class="w-7 h-7 rounded bg-purple-900/30 flex items-center justify-center text-purple-400 text-xs font-bold border border-purple-900/50">TR</div>
+<div class="flex flex-col">
+<span class="text-text-main font-medium leading-none">T-800 Reese</span>
+<span class="text-text-muted text-[11px] font-mono mt-0.5">FUTUR\treese</span>
+</div>
+</div>
+</td>
+<td class="px-2 text-right text-xs text-text-muted font-mono">SEC</td>
+</tr>
+<!-- Item 5 -->
+<tr class="group hover:bg-surface-highlight transition-colors border-b border-border-subtle/30 h-12">
+<td class="pl-2 pr-2"><input class="rounded border-border-subtle bg-background-dark focus:ring-0 focus:ring-offset-0 text-primary w-4 h-4" type="checkbox"/></td>
+<td class="px-2">
+<div class="flex items-center gap-3">
+<div class="w-7 h-7 rounded bg-slate-800 flex items-center justify-center text-slate-400 text-xs font-bold border border-slate-700">JD</div>
+<div class="flex flex-col">
+<span class="text-text-main font-medium leading-none">John Doe</span>
+<span class="text-text-muted text-[11px] font-mono mt-0.5">CORP\jdoe</span>
+</div>
+</div>
+</td>
+<td class="px-2 text-right text-xs text-text-muted font-mono">IT</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="bg-surface-highlight/50 p-2 text-center border-t border-border-subtle">
+<span class="text-[10px] text-text-muted font-mono">Load more members...</span>
+</div>
+</div>
+<!-- CENTRAL CONTROLS: Transfer Actions -->
+<div class="flex flex-col justify-center items-center gap-4 px-2">
+<button class="group flex flex-col items-center justify-center w-10 h-10 rounded bg-surface hover:bg-surface-highlight border border-border-subtle hover:border-primary transition-all text-text-muted hover:text-primary">
+<span class="material-symbols-outlined text-lg group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</button>
+<div class="h-8 w-[1px] bg-border-subtle"></div>
+<button class="group flex flex-col items-center justify-center w-10 h-10 rounded bg-primary hover:bg-primary-dark border border-primary text-background-dark transition-all shadow-[0_0_10px_rgba(13,223,242,0.15)]">
+<span class="material-symbols-outlined text-lg group-hover:-translate-x-0.5 transition-transform font-bold">chevron_left</span>
+</button>
+</div>
+<!-- RIGHT PANE: Available Users -->
+<div class="flex-1 flex flex-col bg-surface border border-border-subtle rounded-md overflow-hidden shadow-sm">
+<!-- Pane Header -->
+<div class="flex-none p-3 border-b border-border-subtle bg-[#1a1a1d] flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-text-muted text-sm">person_search</span>
+<h3 class="font-display font-semibold text-sm text-text-muted">Available Users</h3>
+</div>
+<div class="relative w-48">
+<input class="w-full bg-[#0A0A0C] border border-border-subtle rounded px-2 py-1 text-xs text-text-main focus:border-primary focus:outline-none" placeholder="Search directory..." type="text"/>
+<span class="material-symbols-outlined absolute right-2 top-1.5 text-text-muted text-[14px]">search</span>
+</div>
+</div>
+<!-- Pane Content (Scrollable List) -->
+<div class="flex-1 overflow-y-auto p-2">
+<table class="w-full text-left border-collapse">
+<thead class="text-xs text-text-muted font-mono border-b border-border-subtle">
+<tr>
+<th class="pl-2 pr-2 py-2 w-8"><input class="rounded border-border-subtle bg-background-dark focus:ring-0 focus:ring-offset-0 text-primary w-3 h-3" type="checkbox"/></th>
+<th class="px-2 py-2 font-medium">User</th>
+<th class="px-2 py-2 font-medium text-right">Office</th>
+</tr>
+</thead>
+<tbody class="text-sm">
+<!-- Item 1 -->
+<tr class="group hover:bg-surface-highlight transition-colors border-b border-border-subtle/30 h-12">
+<td class="pl-2 pr-2"><input class="rounded border-border-subtle bg-background-dark focus:ring-0 focus:ring-offset-0 text-primary w-4 h-4" type="checkbox"/></td>
+<td class="px-2">
+<div class="flex items-center gap-3">
+<div class="w-7 h-7 rounded bg-orange-900/30 flex items-center justify-center text-orange-400 text-xs font-bold border border-orange-900/50">EW</div>
+<div class="flex flex-col">
+<span class="text-text-main font-medium leading-none">Ellen Weaver</span>
+<span class="text-text-muted text-[11px] font-mono mt-0.5">CORP\eweaver</span>
+</div>
+</div>
+</td>
+<td class="px-2 text-right text-xs text-text-muted font-mono">NYC</td>
+</tr>
+<!-- Item 2 -->
+<tr class="group hover:bg-surface-highlight transition-colors border-b border-border-subtle/30 h-12">
+<td class="pl-2 pr-2"><input class="rounded border-border-subtle bg-background-dark focus:ring-0 focus:ring-offset-0 text-primary w-4 h-4" type="checkbox"/></td>
+<td class="px-2">
+<div class="flex items-center gap-3">
+<div class="w-7 h-7 rounded bg-teal-900/30 flex items-center justify-center text-teal-400 text-xs font-bold border border-teal-900/50">LM</div>
+<div class="flex flex-col">
+<span class="text-text-main font-medium leading-none">Lia Morales</span>
+<span class="text-text-muted text-[11px] font-mono mt-0.5">CORP\lmorales</span>
+</div>
+</div>
+</td>
+<td class="px-2 text-right text-xs text-text-muted font-mono">SFO</td>
+</tr>
+<!-- Item 3 -->
+<tr class="group hover:bg-surface-highlight transition-colors border-b border-border-subtle/30 h-12">
+<td class="pl-2 pr-2"><input class="rounded border-border-subtle bg-background-dark focus:ring-0 focus:ring-offset-0 text-primary w-4 h-4" type="checkbox"/></td>
+<td class="px-2">
+<div class="flex items-center gap-3">
+<div class="w-7 h-7 rounded bg-pink-900/30 flex items-center justify-center text-pink-400 text-xs font-bold border border-pink-900/50">AR</div>
+<div class="flex flex-col">
+<span class="text-text-main font-medium leading-none">Alex Reed</span>
+<span class="text-text-muted text-[11px] font-mono mt-0.5">CORP\areed</span>
+</div>
+</div>
+</td>
+<td class="px-2 text-right text-xs text-text-muted font-mono">LDN</td>
+</tr>
+<!-- Item 4 -->
+<tr class="group hover:bg-surface-highlight transition-colors border-b border-border-subtle/30 h-12">
+<td class="pl-2 pr-2"><input class="rounded border-border-subtle bg-background-dark focus:ring-0 focus:ring-offset-0 text-primary w-4 h-4" type="checkbox"/></td>
+<td class="px-2">
+<div class="flex items-center gap-3">
+<img class="w-7 h-7 rounded border border-border-subtle object-cover" data-alt="User Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADjFftGQfQMhfPfloJTq3KWxX-36MdrEs1158Jtyx-tX6MInMUOG2U3pdCRyDQFiH8cVePY2DfpvubdMDL5bDXODUsFPlxNiL-0RU9BVxEit7XQ7HtIe1OHy7fV_TSEzEsYNNihfvlHb_kKm82k0Ube73yvYP9x32LwvJc6i4UWofMxII-siOVMRDc3h4JF5j6t0gyYVINSoryzaSAY7g9NAeuL_GVa2wlCpl0JOrReFXci4eJjz2dtw6td4jhGtCE4N65rde4ZNPP"/>
+<div class="flex flex-col">
+<span class="text-text-main font-medium leading-none">David Kim</span>
+<span class="text-text-muted text-[11px] font-mono mt-0.5">CORP\dkim</span>
+</div>
+</div>
+</td>
+<td class="px-2 text-right text-xs text-text-muted font-mono">TOK</td>
+</tr>
+<!-- Item 5 -->
+<tr class="group hover:bg-surface-highlight transition-colors border-b border-border-subtle/30 h-12">
+<td class="pl-2 pr-2"><input class="rounded border-border-subtle bg-background-dark focus:ring-0 focus:ring-offset-0 text-primary w-4 h-4" type="checkbox"/></td>
+<td class="px-2">
+<div class="flex items-center gap-3">
+<div class="w-7 h-7 rounded bg-indigo-900/30 flex items-center justify-center text-indigo-400 text-xs font-bold border border-indigo-900/50">PJ</div>
+<div class="flex flex-col">
+<span class="text-text-main font-medium leading-none">Priya Jain</span>
+<span class="text-text-muted text-[11px] font-mono mt-0.5">CORP\pjain</span>
+</div>
+</div>
+</td>
+<td class="px-2 text-right text-xs text-text-muted font-mono">MUM</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Sticky Bulk Action Bar (Active State) -->
+<div class="flex-none bg-background-dark border-t border-primary/40 p-4 shadow-[0_-5px_15px_rgba(0,0,0,0.5)] z-20">
+<div class="max-w-6xl mx-auto flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="h-2 w-2 rounded-full bg-primary animate-pulse"></div>
+<span class="text-white font-medium">Bulk Action:</span>
+<span class="text-text-muted">You have selected <span class="text-white font-mono font-bold">2</span> users for removal from <span class="text-primary font-mono">VPN_Remote_Users</span>.</span>
+</div>
+<div class="flex gap-3">
+<button class="px-4 py-2 rounded text-sm font-medium text-text-muted hover:text-white transition-colors">
+                        Cancel
+                    </button>
+<button class="flex items-center gap-2 px-6 py-2 rounded bg-primary hover:bg-primary-dark text-background-dark font-bold text-sm transition-all shadow-[0_0_15px_rgba(13,223,242,0.3)]">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+                        Confirm Changes
+                    </button>
+</div>
+</div>
+</div>
+</main>
+</body></html>

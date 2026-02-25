@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Modern Ops AD Manager - Audit Log</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00E5FF", // Electric Blue
+                        "primary-hover": "#00b8cc",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0A0A0C", // Deep charcoal
+                        "surface": "#161618",
+                        "surface-highlight": "#252529",
+                        "text-main": "#EDEDEF",
+                        "text-muted": "#85858E",
+                        "border-color": "#333333",
+                        "success": "#22C55E",
+                        "error": "#EF4444",
+                        "terminal-bg": "#000000",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "4px",
+                        "sm": "2px",
+                        "md": "6px",
+                        "lg": "8px",
+                    },
+                    boxShadow: {
+                        "glow": "0 0 0 2px rgba(0, 229, 255, 0.2)",
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom Scrollbar for the Cyber-Deck look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #161618; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333333; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444444; 
+        }
+
+        /* Blinking cursor animation */
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .animate-blink {
+            animation: blink 1s step-end infinite;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-main font-body h-screen flex flex-col overflow-hidden selection:bg-primary/30 selection:text-primary">
+<!-- Top Navigation -->
+<header class="h-16 border-b border-border-color bg-background-dark flex items-center justify-between px-6 shrink-0 z-20">
+<div class="flex items-center gap-4">
+<div class="size-8 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[32px]">terminal</span>
+</div>
+<h1 class="font-display font-bold text-xl tracking-tight text-white">Modern Ops <span class="text-primary font-light opacity-80">| AD Manager</span></h1>
+</div>
+<div class="flex-1 max-w-2xl mx-8">
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="block w-full rounded bg-surface border border-border-color py-2 pl-10 pr-3 text-sm placeholder:text-text-muted text-text-main focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 font-mono transition-colors" placeholder="&gt; Type a command or search logs..." type="text"/>
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+<span class="text-xs text-text-muted font-mono border border-border-color rounded px-1.5 py-0.5">⌘K</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="relative p-2 text-text-muted hover:text-white transition-colors rounded hover:bg-surface-highlight">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-error rounded-full border border-background-dark"></span>
+</button>
+<div class="h-8 w-[1px] bg-border-color"></div>
+<div class="flex items-center gap-3 pl-2">
+<div class="text-right hidden sm:block">
+<p class="text-sm font-display font-medium leading-none text-white">Admin User</p>
+<p class="text-xs font-mono text-primary mt-1">Tier 3 Support</p>
+</div>
+<div class="size-9 rounded bg-surface-highlight border border-border-color flex items-center justify-center overflow-hidden">
+<img alt="User Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARfQGpOcl0307Q3gutOlhV4VNVT4f_y7qVzGC-0MmiCYHSOCYL7DDT4uZNE19WqmkMWK0U9gMmt5vf-uBy2DE7PWtnczpehrewIKEvEEBEKhAavVMGGYyoR5xJxnvhwCVnQayhKUNpgij0fsQAZMdNRUe_Y5LtPW-WBhYM-fXS8NIUSSBa805LDSgttWLMjp1Ze49G-4JtyXFGpuEoo1AgxWiv4gC2KSF1SNu0xYQcr8zIqTkPdxcCoS8A80rQc7ozpA_sbVHZCwqR"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex flex-1 overflow-hidden relative">
+<!-- Left Panel: Job History List (Master) -->
+<aside class="w-[30%] min-w-[320px] max-w-[480px] border-r border-border-color bg-surface flex flex-col z-10">
+<!-- Filter Bar -->
+<div class="p-4 border-b border-border-color flex flex-col gap-3">
+<div class="flex justify-between items-center">
+<h2 class="font-display font-bold text-lg text-white">Execution Log</h2>
+<span class="px-2 py-0.5 bg-surface-highlight border border-border-color rounded text-xs font-mono text-text-muted">Live</span>
+</div>
+<div class="flex gap-2">
+<div class="relative flex-1">
+<span class="absolute inset-y-0 left-2 flex items-center text-text-muted">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+</span>
+<input class="w-full bg-background-dark border border-border-color rounded py-1.5 pl-8 pr-2 text-xs text-text-main focus:border-primary focus:ring-0 font-mono" placeholder="Filter by User, ID..." type="text"/>
+</div>
+<button class="px-3 py-1.5 bg-background-dark border border-border-color rounded hover:border-text-muted text-text-muted hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+</button>
+</div>
+</div>
+<!-- List Container -->
+<div class="flex-1 overflow-y-auto">
+<!-- List Item: Active/Selected -->
+<div class="group flex flex-col gap-1 p-4 border-b border-border-color bg-surface-highlight border-l-2 border-l-primary cursor-pointer transition-colors relative">
+<div class="flex justify-between items-start mb-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-error text-[16px]">cancel</span>
+<span class="font-display font-semibold text-white text-sm">Unlock Account</span>
+</div>
+<span class="font-mono text-xs text-text-muted">Just now</span>
+</div>
+<div class="flex justify-between items-center pl-6">
+<div class="flex flex-col">
+<span class="font-mono text-xs text-text-muted">Target:</span>
+<span class="font-mono text-sm text-white">CORP\dwinters</span>
+</div>
+<div class="px-2 py-0.5 rounded bg-error/10 border border-error/20 text-error text-[10px] font-mono font-bold tracking-wide">FAILED</div>
+</div>
+</div>
+<!-- List Item: Success -->
+<div class="group flex flex-col gap-1 p-4 border-b border-border-color hover:bg-surface-highlight/50 border-l-2 border-l-transparent hover:border-l-border-color cursor-pointer transition-colors">
+<div class="flex justify-between items-start mb-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-success text-[16px]">check_circle</span>
+<span class="font-display font-medium text-text-muted group-hover:text-white text-sm">Add to Group</span>
+</div>
+<span class="font-mono text-xs text-text-muted">14:02:22</span>
+</div>
+<div class="flex justify-between items-center pl-6">
+<div class="flex flex-col">
+<span class="font-mono text-xs text-text-muted">Target:</span>
+<span class="font-mono text-sm text-text-muted group-hover:text-white">VPN_Users → jsmith</span>
+</div>
+<div class="px-2 py-0.5 rounded bg-success/10 border border-success/20 text-success text-[10px] font-mono font-bold tracking-wide">SUCCESS</div>
+</div>
+</div>
+<!-- List Item: Success -->
+<div class="group flex flex-col gap-1 p-4 border-b border-border-color hover:bg-surface-highlight/50 border-l-2 border-l-transparent hover:border-l-border-color cursor-pointer transition-colors">
+<div class="flex justify-between items-start mb-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-success text-[16px]">check_circle</span>
+<span class="font-display font-medium text-text-muted group-hover:text-white text-sm">Reset Password</span>
+</div>
+<span class="font-mono text-xs text-text-muted">13:45:10</span>
+</div>
+<div class="flex justify-between items-center pl-6">
+<div class="flex flex-col">
+<span class="font-mono text-xs text-text-muted">Target:</span>
+<span class="font-mono text-sm text-text-muted group-hover:text-white">CORP\aanderson</span>
+</div>
+<div class="px-2 py-0.5 rounded bg-success/10 border border-success/20 text-success text-[10px] font-mono font-bold tracking-wide">SUCCESS</div>
+</div>
+</div>
+<!-- List Item: Warning/Pending -->
+<div class="group flex flex-col gap-1 p-4 border-b border-border-color hover:bg-surface-highlight/50 border-l-2 border-l-transparent hover:border-l-border-color cursor-pointer transition-colors">
+<div class="flex justify-between items-start mb-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-yellow-500 text-[16px]">warning</span>
+<span class="font-display font-medium text-text-muted group-hover:text-white text-sm">Provison User</span>
+</div>
+<span class="font-mono text-xs text-text-muted">12:10:05</span>
+</div>
+<div class="flex justify-between items-center pl-6">
+<div class="flex flex-col">
+<span class="font-mono text-xs text-text-muted">Target:</span>
+<span class="font-mono text-sm text-text-muted group-hover:text-white">CORP\newhire_01</span>
+</div>
+<div class="px-2 py-0.5 rounded bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-[10px] font-mono font-bold tracking-wide">WARN</div>
+</div>
+</div>
+<!-- List Item: Success -->
+<div class="group flex flex-col gap-1 p-4 border-b border-border-color hover:bg-surface-highlight/50 border-l-2 border-l-transparent hover:border-l-border-color cursor-pointer transition-colors">
+<div class="flex justify-between items-start mb-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-success text-[16px]">check_circle</span>
+<span class="font-display font-medium text-text-muted group-hover:text-white text-sm">Disable Account</span>
+</div>
+<span class="font-mono text-xs text-text-muted">11:30:00</span>
+</div>
+<div class="flex justify-between items-center pl-6">
+<div class="flex flex-col">
+<span class="font-mono text-xs text-text-muted">Target:</span>
+<span class="font-mono text-sm text-text-muted group-hover:text-white">CORP\term_user_x</span>
+</div>
+<div class="px-2 py-0.5 rounded bg-success/10 border border-success/20 text-success text-[10px] font-mono font-bold tracking-wide">SUCCESS</div>
+</div>
+</div>
+</div>
+<!-- Bottom Stats for List -->
+<div class="p-3 bg-background-dark border-t border-border-color flex justify-between text-xs font-mono text-text-muted">
+<span>Total Jobs: 1,402</span>
+<span>Avg Time: 340ms</span>
+</div>
+</aside>
+<!-- Right Panel: Execution Terminal (Detail) -->
+<section class="flex-1 bg-background-dark flex flex-col min-w-0">
+<!-- Terminal Toolbar -->
+<div class="h-14 border-b border-border-color bg-surface flex items-center justify-between px-6 shrink-0">
+<div class="flex items-center gap-4">
+<div class="p-1.5 rounded bg-surface-highlight border border-border-color">
+<span class="material-symbols-outlined text-text-muted text-[18px]">terminal</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-mono text-sm text-primary font-semibold">Invoke-ADUnlock.ps1</span>
+<span class="text-xs text-text-muted font-mono px-1.5 py-0.5 rounded bg-surface-highlight border border-border-color">v2.4.1</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-text-muted mt-0.5 font-mono">
+<span>ID: <span class="text-white">#882910</span></span>
+<span class="w-1 h-1 rounded-full bg-border-color"></span>
+<span>Exec: <span class="text-white">Admin User</span></span>
+<span class="w-1 h-1 rounded-full bg-border-color"></span>
+<span>Duration: <span class="text-white">450ms</span></span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-text-muted hover:text-white border border-border-color rounded hover:bg-surface-highlight transition-colors font-mono">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+                        Copy Output
+                    </button>
+<button class="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-text-muted hover:text-white border border-border-color rounded hover:bg-surface-highlight transition-colors font-mono">
+<span class="material-symbols-outlined text-[16px]">download</span>
+                        Raw Log
+                    </button>
+</div>
+</div>
+<!-- Terminal Window -->
+<div class="flex-1 bg-terminal-bg p-6 overflow-y-auto font-mono text-[13px] leading-relaxed relative">
+<!-- Background decoration (optional subtle grid) -->
+<div class="absolute inset-0 pointer-events-none opacity-[0.03]" style="background-image: linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px); background-size: 20px 20px;"></div>
+<div class="relative z-10 text-gray-300">
+<div class="mb-2 text-text-muted">
+<span class="text-primary">PS C:\OpsManager\Scripts&gt;</span> .\Invoke-ADUnlock.ps1 -Target "CORP\dwinters" -Force
+                    </div>
+<div class="mb-1">
+<span class="text-blue-400">[INFO]</span> Initializing sequence...
+                    </div>
+<div class="mb-1">
+<span class="text-blue-400">[INFO]</span> Timestamp: 2023-10-27T14:02:22Z
+                    </div>
+<div class="mb-1">
+<span class="text-blue-400">[INFO]</span> Connected to Domain Controller: <span class="text-yellow-200">DC-01.corp.modernops.local</span> (Latency: 12ms)
+                    </div>
+<br/>
+<div class="mb-1">
+<span class="text-text-muted">&gt; Querying AD Object...</span> <span class="text-success">[OK]</span>
+</div>
+<div class="mb-1">
+<span class="text-text-muted">&gt; Validating Permissions...</span> <span class="text-success">[OK]</span>
+</div>
+<div class="mb-1">
+<span class="text-text-muted">&gt; Retrieving LockoutStatus...</span>
+</div>
+<div class="pl-4 border-l border-border-color my-2 py-1 text-gray-400">
+                        Object: CN=Winters\, David,OU=Sales,DC=corp,DC=modernops,DC=local<br/>
+                        SamAccountName: dwinters<br/>
+                        LastBadPasswordAttempt: 2023-10-27 13:55:00<br/>
+                        LockedOut: <span class="text-error font-bold">True</span>
+</div>
+<div class="mb-1">
+<span class="text-text-muted">&gt; Attempting Unlock...</span>
+</div>
+<br/>
+<!-- Error Block -->
+<div class="bg-error/10 border border-error/30 p-3 rounded-sm mb-4">
+<div class="text-error font-bold mb-1">ERROR: Operation Failed</div>
+<div class="text-error/80">
+                            Exception calling "Unlock" with "1" argument(s): "The server is unwilling to process the request. (Exception from HRESULT: 0x80072035)"<br/>
+                            At C:\OpsManager\Scripts\Invoke-ADUnlock.ps1:45 char:5<br/>
+                            +     $User.UnlockAccount()<br/>
+                            +     ~~~~~~~~~~~~~~~~~~~~~<br/>
+                                + CategoryInfo          : NotSpecified: (:) [], MethodInvocationException<br/>
+                                + FullyQualifiedErrorId : COMException
+                        </div>
+</div>
+<div class="mb-1">
+<span class="text-text-muted">&gt; Checking Policy Constraints...</span>
+</div>
+<div class="mb-1">
+<span class="text-yellow-400">[WARN]</span> Account is flagged by 'System Admin Policy #404'. Manual override required.
+                    </div>
+<div class="mt-4">
+<span class="text-error">[CRITICAL]</span> Action Terminated. Exit Code: 1
+                    </div>
+<div class="mt-2">
+<span class="text-primary">PS C:\OpsManager\Scripts&gt;</span> <span class="animate-blink text-primary font-bold">_</span>
+</div>
+</div>
+</div>
+<!-- Terminal Status Bar -->
+<div class="bg-surface border-t border-border-color px-4 py-1 flex justify-between items-center text-[10px] font-mono text-text-muted select-none">
+<div class="flex gap-4">
+<span>UTF-8</span>
+<span>LF</span>
+<span>PowerShell 7.2</span>
+</div>
+<div class="flex gap-2 items-center">
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+<span>Process Exited</span>
+</div>
+</div>
+</section>
+</main>
+</body></html>

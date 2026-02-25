@@ -1,0 +1,185 @@
+{% extends 'layout.html' %}
+
+{% block title %}New User Provisioning // Modern Ops{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-8">
+  <!-- Header Section -->
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-2 pb-6 border-b border-border">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <span class="text-primary text-[10px] font-mono tracking-[0.2em] uppercase">sys_admin // tasks</span>
+        <span class="h-px w-8 bg-primary/30"></span>
+      </div>
+      <h2 class="font-display text-3xl font-bold text-white tracking-tight">New User Provisioning</h2>
+      <p class="text-muted mt-2 font-mono text-xs">Configure identity attributes and group memberships for onboarding.
+      </p>
+    </div>
+    <div class="flex items-center gap-3">
+      <button onclick="window.location.reload()"
+        class="flex items-center gap-2 bg-surface-highlight border border-border px-4 py-2 rounded-sm hover:border-muted transition-colors">
+        <span class="material-symbols-outlined text-muted text-sm">refresh</span>
+        <span class="text-sm font-mono text-white">RESET_FORM</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Wizard Layout -->
+  <div class="flex flex-col lg:flex-row gap-8 grow">
+    <!-- Left: Progress Steps -->
+    <div class="w-full lg:w-64 shrink-0">
+      <div class="lg:sticky lg:top-4 space-y-1">
+        <div class="relative pl-6 py-4 border-l-2 border-primary">
+          <span
+            class="absolute -left-[5px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(13,223,242,0.8)]"></span>
+          <h3 class="text-primary font-display font-bold text-sm tracking-wide uppercase">01. Identity Config</h3>
+          <p class="text-[10px] text-primary/70 mt-1 font-mono uppercase">Basic attributes & credentials</p>
+        </div>
+        <div class="relative pl-6 py-4 border-l-2 border-border group opacity-40">
+          <span
+            class="absolute -left-[5px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-surface border border-muted transition-colors"></span>
+          <h3 class="text-muted font-display font-bold text-sm tracking-wide uppercase">02. Groups & OU</h3>
+          <p class="text-[10px] text-muted/50 mt-1 font-mono uppercase">Permissions & hierarchy</p>
+        </div>
+
+        <div class="mt-12 p-4 rounded bg-surface/50 border border-border backdrop-blur-sm">
+          <h4 class="text-[10px] font-mono text-muted uppercase mb-4 tracking-widest">AD_Status</h4>
+          <div class="space-y-4">
+            <div class="flex items-center gap-3">
+              <div class="w-2 h-2 rounded-full bg-success shadow-[0_0_6px_rgba(34,197,94,0.6)]"></div>
+              <span class="text-xs font-mono text-white">DC_REIS_01: ONLINE</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Form Area -->
+    <div class="flex-1 bg-surface border border-border rounded-lg p-6 lg:p-10 shadow-2xl relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent">
+      </div>
+
+      <form action="/create_user" method="POST" class="space-y-10">
+        <!-- Personal Info Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
+          <div class="md:col-span-2 pb-2 border-b border-border/50 flex items-center justify-between">
+            <h3 class="text-white font-display font-bold text-lg">Personal Information</h3>
+            <span
+              class="text-[10px] font-mono text-muted bg-surface-highlight px-2 py-1 rounded border border-border uppercase tracking-widest">Section_ID:
+              0xA1</span>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-[10px] font-medium text-muted uppercase tracking-wider ml-1">First Name</label>
+            <input type="text" name="first_name" required
+              class="w-full bg-[#0A0A0C] border border-border rounded text-white px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-glow transition-all placeholder-muted/10 font-body"
+              placeholder="e.g. Sarah">
+          </div>
+          <div class="space-y-2">
+            <label class="block text-[10px] font-medium text-muted uppercase tracking-wider ml-1">Last Name</label>
+            <input type="text" name="last_name" required
+              class="w-full bg-[#0A0A0C] border border-border rounded text-white px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-glow transition-all placeholder-muted/10 font-body"
+              placeholder="e.g. Connor">
+          </div>
+          <div class="space-y-2">
+            <label class="block text-[10px] font-medium text-muted uppercase tracking-wider ml-1">Job Title</label>
+            <input type="text" name="job_title" required
+              class="w-full bg-[#0A0A0C] border border-border rounded text-white px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-glow transition-all placeholder-muted/10 font-body"
+              placeholder="e.g. Systems Analyst">
+          </div>
+          <div class="space-y-2">
+            <label class="block text-[10px] font-medium text-muted uppercase tracking-wider ml-1">Department</label>
+            <select name="department" required
+              class="w-full bg-[#0A0A0C] border border-border rounded text-white px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-glow transition-all appearance-none cursor-pointer font-body">
+              <option value="Information Technology">Information Technology</option>
+              <option value="Human Resources">Human Resources</option>
+              <option value="Sales & Marketing">Sales & Marketing</option>
+              <option value="Operations">Operations</option>
+            </select>
+          </div>
+
+          <!-- Account Details Section -->
+          <div class="md:col-span-2 pt-6 pb-2 border-b border-border/50 flex items-center justify-between mt-2">
+            <h3 class="text-white font-display font-bold text-lg">Account Configuration</h3>
+            <span
+              class="text-[10px] font-mono text-muted bg-surface-highlight px-2 py-1 rounded border border-border uppercase tracking-widest">Section_ID:
+              0xB2</span>
+          </div>
+
+          <div class="md:col-span-2 space-y-4">
+            <label class="block text-[10px] font-medium text-muted uppercase tracking-wider ml-1">Job Profile /
+              Template</label>
+            <select name="profile" required
+              class="w-full bg-[#0A0A0C] border border-border rounded text-white px-4 py-3 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-glow transition-all appearance-none cursor-pointer font-body">
+              <option value="" selected disabled>Select a profile template...</option>
+              {% for key, value in perfis.items() %}
+              <option value="{{ key }}">{{ value.label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="md:col-span-2 space-y-2">
+            <label class="block text-[10px] font-medium text-muted uppercase tracking-wider ml-1">User Logon Name
+              (UPN)</label>
+            <div class="relative">
+              <div
+                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-primary/70 font-mono font-bold select-none">
+                ></div>
+              <input type="text" name="username" required
+                class="w-full bg-[#0A0A0C] border border-border rounded text-primary font-mono px-4 py-2.5 pl-8 pr-32 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-glow transition-all placeholder-muted/10"
+                placeholder="s.connor">
+              <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                <span class="text-muted font-mono text-[10px] uppercase tracking-tighter">@{{ config.AD_DOMAIN }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-[10px] font-medium text-muted uppercase tracking-wider ml-1">Employee ID</label>
+            <input type="text" name="employee_id"
+              class="w-full bg-[#0A0A0C] border border-border rounded text-white px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-glow transition-all placeholder-muted/10 font-mono"
+              placeholder="00-48291">
+          </div>
+          <div class="space-y-2">
+            <label class="block text-[10px] font-medium text-muted uppercase tracking-wider ml-1">Office
+              Location</label>
+            <select name="office_location" required
+              class="w-full bg-[#0A0A0C] border border-border rounded text-white px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-glow transition-all appearance-none cursor-pointer font-body">
+              <option value="HQ - New York">HQ - New York</option>
+              <option value="Remote - US">Remote - US</option>
+              <option value="Branch - London">Branch - London</option>
+            </select>
+          </div>
+
+          <!-- Password Config -->
+          <div class="md:col-span-2 space-y-4 pt-4">
+            <label class="block text-[10px] font-medium text-muted uppercase tracking-wider ml-1">Password Setup</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <label
+                class="relative flex items-center gap-3 p-3 border border-border bg-[#0A0A0C] rounded cursor-pointer transition-all hover:border-primary/30">
+                <input type="password" name="password" required
+                  class="w-full bg-transparent border-none text-white font-mono p-0 focus:ring-0 placeholder-muted/20"
+                  placeholder="Set initial password">
+                <span class="material-symbols-outlined text-muted text-sm px-2">lock</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="mt-12 pt-6 border-t border-border flex items-center justify-between">
+          <a href="{{ url_for('index') }}"
+            class="text-muted hover:text-white px-4 py-2 rounded text-[10px] font-mono transition-colors hover:bg-surface-highlight uppercase tracking-[0.2em]">
+            [ ESC ] CANCEL
+          </a>
+          <button type="submit"
+            class="bg-transparent border border-primary text-primary hover:bg-primary hover:text-background-dark px-10 py-4 rounded text-xs font-bold tracking-[0.2em] transition-all shadow-[0_0_20px_rgba(13,223,242,0.1)] hover:shadow-[0_0_30px_rgba(13,223,242,0.4)] flex items-center gap-3 font-mono group">
+            COMMIT_PROVISIONING
+            <span class="material-symbols-outlined text-lg group-hover:translate-x-2 transition-transform">bolt</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

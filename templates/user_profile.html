@@ -1,0 +1,306 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="space-y-6 animate-fade-in">
+  <!-- Breadcrumb -->
+  <nav class="flex items-center space-x-2 font-mono text-xs text-muted mb-4">
+    <a href="{{ url_for('index') }}" class="hover:text-primary transition-colors">Directory</a>
+    <span>/</span>
+    <a href="{{ url_for('groups') }}" class="hover:text-primary transition-colors">Users</a>
+    <span>/</span>
+    <span class="text-primary">{{ user.username }}</span>
+  </nav>
+
+  <!-- Main Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-12">
+    <!-- Sidebar: Identity Card -->
+    <div class="lg:col-span-4 flex flex-col gap-6">
+      <div class="bg-surface border border-border rounded-lg overflow-hidden relative shadow-lg">
+        <!-- Status Accent -->
+        <div
+          class="h-1 w-full bg-gradient-to-r {{ 'from-error to-error/50' if user.is_locked or user.is_disabled else 'from-success to-success/50' }}">
+        </div>
+
+        <div class="p-8 flex flex-col items-center text-center border-b border-border relative">
+          <!-- Status Badge -->
+          <div class="absolute top-4 right-4">
+            {% if user.is_locked %}
+            <span
+              class="inline-flex items-center rounded-full bg-error/10 px-2.5 py-0.5 text-[10px] font-bold text-error ring-1 ring-inset ring-error/20 font-mono tracking-wider">
+              <span class="mr-1.5 h-1.5 w-1.5 rounded-full bg-error animate-pulse"></span>
+              LOCKED
+            </span>
+            {% elif user.is_disabled %}
+            <span
+              class="inline-flex items-center rounded-full bg-muted/10 px-2.5 py-0.5 text-[10px] font-bold text-muted ring-1 ring-inset ring-muted/20 font-mono tracking-wider">
+              DISABLED
+            </span>
+            {% else %}
+            <span
+              class="inline-flex items-center rounded-full bg-success/10 px-2.5 py-0.5 text-[10px] font-bold text-success ring-1 ring-inset ring-success/20 font-mono tracking-wider">
+              <span class="mr-1.5 h-1.5 w-1.5 rounded-full bg-success"></span>
+              ACTIVE
+            </span>
+            {% endif %}
+          </div>
+
+          <!-- Avatar -->
+          <div
+            class="size-24 rounded-full bg-surface-highlight border-2 {{ 'border-error' if user.is_locked else 'border-primary' }} p-1 mb-4">
+            <div
+              class="w-full h-full rounded-full bg-background-dark flex items-center justify-center text-3xl font-display font-bold text-primary">
+              {{ user.display_name[:1] | upper }}
+            </div>
+          </div>
+
+          <h1 class="text-2xl font-display font-bold text-white mb-1">{{ user.display_name }}</h1>
+          <div class="flex items-center gap-2 mb-6">
+            <span class="material-symbols-outlined text-muted text-sm">badge</span>
+            <code
+              class="text-xs font-mono text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">@{{ user.username }}</code>
+          </div>
+
+          <!-- Quick Metrics -->
+          <div class="grid grid-cols-2 gap-4 w-full pt-6 border-t border-border">
+            <div class="flex flex-col text-left">
+              <span class="text-[10px] text-muted uppercase tracking-widest mb-1">Last Logon</span>
+              <span class="text-xs font-mono text-white truncate" title="{{ user.last_logon }}">{{
+                user.last_logon.split(' ')[0] if user.last_logon != 'N/A' else 'N/A' }}</span>
+            </div>
+            <div class="flex flex-col text-right">
+              <span class="text-[10px] text-muted uppercase tracking-widest mb-1">Bad Pwd</span>
+              <span
+                class="text-xs font-mono {{ 'text-error font-bold' if user.bad_pwd_count > 0 else 'text-white' }}">{{
+                user.bad_pwd_count }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Grid -->
+        <div class="p-4 bg-background-dark/30">
+          <div class="grid grid-cols-2 gap-3">
+            <button
+              class="flex flex-col items-center justify-center gap-2 p-3 rounded border border-border bg-surface hover:bg-surface-highlight hover:border-primary/50 text-muted hover:text-primary transition-all group">
+              <span class="material-symbols-outlined group-hover:scale-110 transition-transform">lock_open</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider">Unlock</span>
+            </button>
+            <button
+              class="flex flex-col items-center justify-center gap-2 p-3 rounded border border-border bg-surface hover:bg-surface-highlight hover:border-primary/50 text-muted hover:text-primary transition-all group">
+              <span class="material-symbols-outlined group-hover:scale-110 transition-transform">key</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider">Reset Pwd</span>
+            </button>
+            <button
+              class="flex flex-col items-center justify-center gap-2 p-3 rounded border border-border bg-surface hover:bg-surface-highlight hover:border-error/50 text-muted hover:text-error transition-all group">
+              <span class="material-symbols-outlined group-hover:scale-110 transition-transform">block</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider">{{ 'Enable' if user.is_disabled else
+                'Disable' }}</span>
+            </button>
+            <button
+              class="flex flex-col items-center justify-center gap-2 p-3 rounded border border-border bg-surface hover:bg-surface-highlight hover:border-primary/50 text-muted hover:text-primary transition-all group">
+              <span class="material-symbols-outlined group-hover:scale-110 transition-transform">move_group</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider">Move OU</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Details Card -->
+      <div class="bg-surface border border-border rounded-lg p-6 space-y-4">
+        <h3 class="text-xs font-mono font-bold text-white uppercase tracking-[0.2em] flex items-center gap-2 mb-2">
+          <span class="h-px w-4 bg-primary/50"></span>
+          Account Metadata
+        </h3>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center py-2 border-b border-border/50">
+            <span class="text-xs text-muted">Created Date</span>
+            <span class="text-xs font-mono text-white">{{ user.created.split(' ')[0] if user.created != 'N/A' else 'N/A'
+              }}</span>
+          </div>
+          <div class="flex justify-between items-center py-2 border-b border-border/50">
+            <span class="text-xs text-muted">Object GUID</span>
+            <span class="text-[10px] font-mono text-muted truncate ml-4" title="{{ user.guid }}">{{ user.guid }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Column: Attributes & Groups -->
+    <div class="lg:col-span-8 space-y-6">
+      <!-- Tabs Navigation -->
+      <div class="bg-surface border border-border rounded-lg overflow-hidden flex flex-col min-h-[600px]">
+        <div class="flex items-center px-6 pt-2 border-b border-border bg-background-dark/20">
+          <button onclick="tabSwitch('attributes')" id="tabBtn-attributes"
+            class="px-6 py-4 text-xs font-bold uppercase tracking-widest transition-all border-b-2 text-primary border-primary">
+            Attributes
+          </button>
+          <button onclick="tabSwitch('groups')" id="tabBtn-groups"
+            class="px-6 py-4 text-xs font-bold uppercase tracking-widest transition-all border-b-2 text-muted border-transparent hover:text-white">
+            Groups <span class="ml-2 bg-surface-highlight px-1.5 py-0.5 rounded-full text-[10px]">{{ user.groups |
+              length }}</span>
+          </button>
+          <button onclick="tabSwitch('logs')" id="tabBtn-logs"
+            class="px-6 py-4 text-xs font-bold uppercase tracking-widest transition-all border-b-2 text-muted border-transparent hover:text-white">
+            Access Logs
+          </button>
+        </div>
+
+        <!-- Attributes Panel -->
+        <div id="tab-attributes" class="tab-content p-8 space-y-12 block">
+          <!-- Core Identity -->
+          <div>
+            <h4
+              class="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
+              <span class="size-1.5 bg-primary rounded-full shadow-glow"></span>
+              Core Identity
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div class="group">
+                <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Display
+                  Name</label>
+                <div
+                  class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
+                  <span class="text-sm text-white font-mono">{{ user.display_name }}</span>
+                  <span
+                    class="material-symbols-outlined text-xs text-muted group-hover:text-primary opacity-0 group-hover:opacity-100 transition-all cursor-pointer">content_copy</span>
+                </div>
+              </div>
+              <div class="group">
+                <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Email
+                  Address</label>
+                <div
+                  class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
+                  <span class="text-sm text-white font-mono">{{ user.mail }}</span>
+                  <span
+                    class="material-symbols-outlined text-xs text-muted group-hover:text-primary opacity-0 group-hover:opacity-100 transition-all cursor-pointer">content_copy</span>
+                </div>
+              </div>
+              <div class="md:col-span-2 group">
+                <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Distinguished Name
+                  (DN)</label>
+                <div
+                  class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
+                  <span class="text-[10px] text-muted font-mono truncate mr-8">{{ user.dn }}</span>
+                  <span
+                    class="material-symbols-outlined text-xs text-muted group-hover:text-primary opacity-0 group-hover:opacity-100 transition-all cursor-pointer">content_copy</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Organization -->
+          <div>
+            <h4
+              class="text-[10px] font-mono font-bold text-muted uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
+              <span class="size-1.5 bg-muted rounded-full"></span>
+              Organization
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div class="group">
+                <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Job Title</label>
+                <div
+                  class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
+                  <span class="text-sm text-white font-mono">{{ user.title }}</span>
+                </div>
+              </div>
+              <div class="group">
+                <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Department</label>
+                <div
+                  class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
+                  <span class="text-sm text-white font-mono">{{ user.department }}</span>
+                </div>
+              </div>
+              <div class="group">
+                <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Office
+                  Location</label>
+                <div
+                  class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
+                  <span class="text-sm text-white font-mono">{{ user.office }}</span>
+                </div>
+              </div>
+              <div class="group">
+                <label class="block text-[10px] text-muted uppercase tracking-widest mb-1 font-bold">Manager</label>
+                <div
+                  class="flex items-center justify-between border-b border-border pb-2 group-hover:border-primary/50 transition-colors">
+                  <span class="text-sm text-primary font-mono cursor-pointer hover:underline">{{ user.manager }}</span>
+                  <span class="material-symbols-outlined text-xs text-muted">open_in_new</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Groups Panel -->
+        <div id="tab-groups" class="tab-content p-8 hidden animate-fade-in">
+          <div class="flex items-center justify-between mb-8">
+            <div>
+              <h4 class="text-[10px] font-mono font-bold text-white uppercase tracking-[0.3em] flex items-center gap-3">
+                <span class="size-1.5 bg-success rounded-full shadow-[0_0_8px_rgba(34,197,94,0.5)]"></span>
+                Security Memberships
+              </h4>
+              <p class="text-[10px] text-muted mt-2 uppercase tracking-widest">Listing all groups assigned to this
+                identity object.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {% for group in user.groups %}
+            <div
+              class="group flex items-center justify-between bg-surface-highlight/50 border border-border rounded p-3 hover:border-primary/30 transition-all">
+              <div class="flex items-center gap-3">
+                <div
+                  class="size-8 rounded bg-background-dark flex items-center justify-center text-muted group-hover:text-primary transition-colors">
+                  <span class="material-symbols-outlined text-lg">
+                    {{ 'security' if 'Admin' in group or 'Domain' in group else 'group' }}
+                  </span>
+                </div>
+                <p class="text-xs font-mono text-white leading-none truncate" title="{{ group }}">{{ group }}</p>
+              </div>
+            </div>
+            {% else %}
+            <div
+              class="col-span-2 py-20 flex flex-col items-center justify-center bg-background-dark/20 border border-dashed border-border rounded">
+              <span class="material-symbols-outlined text-muted text-4xl mb-4">group_off</span>
+              <p class="text-xs text-muted font-mono italic">No security groups found for this identity.</p>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Logs Panel -->
+        <div id="tab-logs" class="tab-content p-8 hidden animate-fade-in">
+          <div class="text-center py-20">
+            <span class="material-symbols-outlined text-muted text-4xl mb-4">history</span>
+            <p class="text-xs text-muted font-mono uppercase tracking-widest">Access logging history coming soon.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function tabSwitch(tabId) {
+    // Hide all contents
+    document.querySelectorAll('.tab-content').forEach(el => {
+      el.classList.add('hidden');
+      el.classList.remove('block');
+    });
+
+    // Remove active styles from all buttons
+    document.querySelectorAll('[id^="tabBtn-"]').forEach(btn => {
+      btn.classList.remove('text-primary', 'border-primary');
+      btn.classList.add('text-muted', 'border-transparent');
+    });
+
+    // Show target content
+    const targetTab = document.getElementById(`tab-${tabId}`);
+    targetTab.classList.remove('hidden');
+    targetTab.classList.add('block');
+
+    // Add active styles to target button
+    const activeBtn = document.getElementById(`tabBtn-${tabId}`);
+    activeBtn.classList.add('text-primary', 'border-primary');
+    activeBtn.classList.remove('text-muted', 'border-transparent');
+  }
+</script>
+{% endblock %}

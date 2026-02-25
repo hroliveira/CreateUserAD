@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Modern Ops // AD Manager - New User Provisioning</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#0ddff2", // Cyan Electric Blue
+              "primary-dark": "#0abccb",
+              "background-light": "#f5f8f8", // Not used in this dark design but kept for config compatibility
+              "background-dark": "#0A0A0C", // Deep charcoal
+              "surface": "#161618",
+              "surface-highlight": "#252529",
+              "muted": "#85858E",
+              "border": "#333333",
+              "success": "#22C55E",
+              "error": "#EF4444",
+            },
+            fontFamily: {
+              "display": ["Space Grotesk", "sans-serif"],
+              "body": ["Inter", "sans-serif"],
+              "mono": ["JetBrains Mono", "monospace"],
+            },
+            boxShadow: {
+                "glow": "0 0 0 2px rgba(13, 223, 242, 0.2)",
+                "glow-focus": "0 0 0 2px rgba(13, 223, 242, 0.5)",
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        /* Custom scrollbar for terminal feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0A0A0C; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0ddff2; 
+        }
+        
+        .glass-panel {
+            background: rgba(22, 22, 24, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 51, 51, 0.6);
+        }
+
+        /* Input autofill fix for dark mode */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active{
+            -webkit-box-shadow: 0 0 0 30px #161618 inset !important;
+            -webkit-text-fill-color: #EDEDEF !important;
+            caret-color: #0ddff2;
+        }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 font-body min-h-screen flex flex-col overflow-hidden selection:bg-primary/30 selection:text-primary">
+<!-- Top Navigation (Simplified from component list to match context) -->
+<header class="h-16 border-b border-border bg-[#102123] flex items-center justify-between px-6 shrink-0 z-20">
+<div class="flex items-center gap-4">
+<div class="size-8 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[32px]">terminal</span>
+</div>
+<div class="flex flex-col">
+<h1 class="font-display font-bold text-lg leading-tight tracking-tight text-white">MODERN OPS <span class="text-primary">//</span> AD MANAGER</h1>
+<span class="text-xs font-mono text-muted tracking-wider">V.2.4.0 [STABLE]</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex items-center bg-surface border border-border rounded px-3 py-1.5 w-64 group focus-within:border-primary transition-colors">
+<span class="material-symbols-outlined text-muted text-lg mr-2">search</span>
+<input class="bg-transparent border-none text-sm text-white placeholder-muted focus:ring-0 w-full font-mono h-5 p-0" placeholder="CMD+K" type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-muted hover:text-white transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 size-2 bg-primary rounded-full"></span>
+</button>
+<div class="h-8 w-8 rounded bg-surface-highlight border border-border flex items-center justify-center text-xs font-mono text-primary font-bold">
+                    JS
+                </div>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="w-16 lg:w-64 border-r border-border bg-[#0A0A0C] flex flex-col justify-between shrink-0 transition-all duration-300">
+<nav class="flex flex-col py-6 gap-2 px-3">
+<a class="flex items-center gap-3 px-3 py-2 text-muted hover:text-white hover:bg-surface-highlight rounded-md transition-all group" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="hidden lg:block font-medium text-sm">Command Center</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-primary bg-primary/10 border border-primary/20 rounded-md transition-all group" href="#">
+<span class="material-symbols-outlined">person_add</span>
+<span class="hidden lg:block font-medium text-sm">Provisioning</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-muted hover:text-white hover:bg-surface-highlight rounded-md transition-all group" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="hidden lg:block font-medium text-sm">Users &amp; Groups</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-muted hover:text-white hover:bg-surface-highlight rounded-md transition-all group" href="#">
+<span class="material-symbols-outlined">terminal</span>
+<span class="hidden lg:block font-medium text-sm">Scripts</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-muted hover:text-white hover:bg-surface-highlight rounded-md transition-all group" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="hidden lg:block font-medium text-sm">Audit Log</span>
+</a>
+</nav>
+<div class="p-4 border-t border-border">
+<div class="flex items-center gap-3 px-2 py-2 text-muted hover:text-error transition-colors cursor-pointer">
+<span class="material-symbols-outlined">logout</span>
+<span class="hidden lg:block font-mono text-xs">LOGOUT_SESSION</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto bg-background-dark p-6 lg:p-10 relative">
+<!-- Background grid decoration -->
+<div class="absolute inset-0 z-0 opacity-[0.03] pointer-events-none" style="background-image: linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px); background-size: 40px 40px;"></div>
+<div class="max-w-6xl mx-auto relative z-10 h-full flex flex-col">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 pb-6 border-b border-border">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="text-primary text-xs font-mono tracking-widest uppercase">sys_admin // tasks</span>
+<span class="h-px w-8 bg-primary/30"></span>
+</div>
+<h2 class="font-display text-3xl font-bold text-white tracking-tight">New User Provisioning</h2>
+<p class="text-muted mt-2 font-mono text-xs">Configure identity attributes and group memberships for onboarding.</p>
+</div>
+<div class="flex items-center gap-3">
+<div class="relative group">
+<div class="absolute -inset-0.5 bg-gradient-to-r from-primary to-blue-600 rounded-sm opacity-20 group-hover:opacity-40 transition duration-200 blur"></div>
+<button class="relative flex items-center gap-2 bg-surface border border-border px-4 py-2 rounded-sm hover:border-primary/50 transition-colors">
+<span class="material-symbols-outlined text-primary text-sm">upload_file</span>
+<span class="text-sm font-mono text-white">Load Template</span>
+<span class="material-symbols-outlined text-muted text-sm ml-2">expand_more</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Wizard Layout -->
+<div class="flex flex-col lg:flex-row gap-8 grow">
+<!-- Left: Progress Steps -->
+<div class="w-full lg:w-64 shrink-0">
+<div class="lg:sticky lg:top-0 space-y-1">
+<!-- Step 1: Active -->
+<div class="relative pl-6 py-3 border-l-2 border-primary">
+<span class="absolute -left-[5px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(13,223,242,0.8)]"></span>
+<h3 class="text-primary font-display font-bold text-sm tracking-wide">01. IDENTITY CONFIG</h3>
+<p class="text-xs text-primary/70 mt-1 font-mono">Basic attributes &amp; credentials</p>
+</div>
+<!-- Step 2: Inactive -->
+<div class="relative pl-6 py-3 border-l-2 border-border group cursor-pointer hover:border-muted transition-colors">
+<span class="absolute -left-[5px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-surface border border-muted group-hover:border-white transition-colors"></span>
+<h3 class="text-muted group-hover:text-white font-display font-bold text-sm tracking-wide transition-colors">02. GROUPS &amp; OU</h3>
+<p class="text-xs text-muted/50 mt-1 font-mono">Permissions &amp; organizational unit</p>
+</div>
+<!-- Step 3: Inactive -->
+<div class="relative pl-6 py-3 border-l-2 border-border group cursor-pointer hover:border-muted transition-colors">
+<span class="absolute -left-[5px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-surface border border-muted group-hover:border-white transition-colors"></span>
+<h3 class="text-muted group-hover:text-white font-display font-bold text-sm tracking-wide transition-colors">03. REVIEW CONFIG</h3>
+<p class="text-xs text-muted/50 mt-1 font-mono">JSON preview &amp; execution</p>
+</div>
+</div>
+<!-- Mini Status Card -->
+<div class="hidden lg:block mt-12 p-4 rounded bg-surface/50 border border-border backdrop-blur-sm">
+<h4 class="text-xs font-mono text-muted uppercase mb-3">System Health</h4>
+<div class="flex items-center gap-3 mb-2">
+<div class="w-2 h-2 rounded-full bg-success shadow-[0_0_6px_rgba(34,197,94,0.6)]"></div>
+<span class="text-sm font-medium text-white">AD Connector: Online</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-success shadow-[0_0_6px_rgba(34,197,94,0.6)]"></div>
+<span class="text-sm font-medium text-white">Exch. Server: Active</span>
+</div>
+</div>
+</div>
+<!-- Right: Form Area -->
+<div class="flex-1 bg-surface border border-border rounded-lg p-6 lg:p-8 shadow-2xl relative overflow-hidden">
+<!-- Decorative top bar -->
+<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
+<form>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
+<!-- Personal Info Section -->
+<div class="md:col-span-2 pb-2 border-b border-border/50 flex items-center justify-between">
+<h3 class="text-white font-display font-bold text-lg">Personal Information</h3>
+<span class="text-xs font-mono text-muted bg-surface-highlight px-2 py-1 rounded border border-border">SECTION_ID: 0xA1</span>
+</div>
+<div class="space-y-2">
+<label class="block text-xs font-medium text-muted uppercase tracking-wider">First Name</label>
+<input class="w-full bg-[#0A0A0C] border border-border rounded text-white px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-glow transition-all placeholder-muted/30 font-body" placeholder="e.g. Sarah" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="block text-xs font-medium text-muted uppercase tracking-wider">Last Name</label>
+<input class="w-full bg-[#0A0A0C] border border-border rounded text-white px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-glow transition-all placeholder-muted/30 font-body" placeholder="e.g. Connor" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="block text-xs font-medium text-muted uppercase tracking-wider">Job Title</label>
+<input class="w-full bg-[#0A0A0C] border border-border rounded text-white px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-glow transition-all placeholder-muted/30 font-body" placeholder="e.g. Systems Analyst" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="block text-xs font-medium text-muted uppercase tracking-wider">Department</label>
+<div class="relative">
+<select class="w-full bg-[#0A0A0C] border border-border rounded text-white px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-glow transition-all appearance-none cursor-pointer font-body">
+<option>Information Technology</option>
+<option>Human Resources</option>
+<option>Sales &amp; Marketing</option>
+<option>Operations</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-muted">
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Account Details Section -->
+<div class="md:col-span-2 pt-6 pb-2 border-b border-border/50 flex items-center justify-between mt-2">
+<h3 class="text-white font-display font-bold text-lg">Account Configuration</h3>
+<span class="text-xs font-mono text-muted bg-surface-highlight px-2 py-1 rounded border border-border">SECTION_ID: 0xB2</span>
+</div>
+<div class="md:col-span-2 space-y-2">
+<label class="block text-xs font-medium text-muted uppercase tracking-wider flex justify-between">
+<span>User Logon Name (UPN)</span>
+<span class="text-primary cursor-pointer hover:underline text-[10px] font-mono flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">autorenew</span> AUTO_GENERATE
+                                        </span>
+</label>
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="text-muted font-mono select-none">&gt;</span>
+</div>
+<input class="w-full bg-[#0A0A0C] border border-border rounded text-primary font-mono px-4 py-2.5 pl-8 pr-32 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-glow transition-all placeholder-muted/30" placeholder="s.connor" type="text"/>
+<div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+<span class="text-muted font-mono text-sm">@corp.local</span>
+</div>
+</div>
+<p class="text-[10px] text-muted font-mono ml-1">Must be unique across the forest.</p>
+</div>
+<div class="space-y-2">
+<label class="block text-xs font-medium text-muted uppercase tracking-wider">Employee ID</label>
+<input class="w-full bg-[#0A0A0C] border border-border rounded text-white font-mono px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-glow transition-all placeholder-muted/30" placeholder="00-48291" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="block text-xs font-medium text-muted uppercase tracking-wider">Office Location</label>
+<div class="relative">
+<select class="w-full bg-[#0A0A0C] border border-border rounded text-white px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-glow transition-all appearance-none cursor-pointer font-body">
+<option>HQ - New York</option>
+<option>Remote - US</option>
+<option>Branch - London</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-muted">
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Password Config -->
+<div class="md:col-span-2 space-y-4 pt-4">
+<label class="block text-xs font-medium text-muted uppercase tracking-wider">Initial Password Setup</label>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<label class="relative flex items-center gap-3 p-3 border border-primary/50 bg-primary/5 rounded cursor-pointer transition-all hover:bg-primary/10">
+<input checked="" class="h-4 w-4 text-primary bg-background-dark border-border focus:ring-primary focus:ring-offset-background-dark" name="pwd-config" type="radio"/>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-white font-mono">Auto-Generate &amp; Email</span>
+<span class="text-xs text-muted">Creates complex string, emails manager.</span>
+</div>
+</label>
+<label class="relative flex items-center gap-3 p-3 border border-border bg-[#0A0A0C] rounded cursor-pointer transition-all hover:border-primary/30">
+<input class="h-4 w-4 text-primary bg-background-dark border-border focus:ring-primary focus:ring-offset-background-dark" name="pwd-config" type="radio"/>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-white font-mono">Manual Set</span>
+<span class="text-xs text-muted">Set specific temporary password.</span>
+</div>
+</label>
+</div>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="mt-12 pt-6 border-t border-border flex items-center justify-between">
+<button class="text-muted hover:text-white px-4 py-2 rounded text-sm font-medium transition-colors font-mono hover:bg-surface-highlight" type="button">
+                                    [ ESC ] CANCEL
+                                </button>
+<button class="bg-transparent border border-primary text-primary hover:bg-primary hover:text-background-dark px-6 py-2.5 rounded text-sm font-bold tracking-wide transition-all shadow-[0_0_10px_rgba(13,223,242,0.1)] hover:shadow-[0_0_15px_rgba(13,223,242,0.4)] flex items-center gap-2 font-mono group" type="button">
+                                    NEXT: GROUP MEMBERSHIP
+                                    <span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+</form>
+</div>
+<!-- Side Panel: Preview / Log (Hidden on mobile, visible on large screens) -->
+<div class="hidden xl:flex flex-col w-72 shrink-0 gap-4">
+<!-- Live Validation -->
+<div class="bg-surface border border-border rounded p-4">
+<h4 class="text-xs font-mono text-muted uppercase mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">fact_check</span>
+                                Validation Status
+                            </h4>
+<div class="space-y-3">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-success text-sm mt-0.5">check_circle</span>
+<div>
+<p class="text-xs text-white font-mono">Identity Unique</p>
+<p class="text-[10px] text-muted">No collisions in forest.</p>
+</div>
+</div>
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-muted text-sm mt-0.5">radio_button_unchecked</span>
+<div>
+<p class="text-xs text-muted font-mono">Attributes Complete</p>
+<p class="text-[10px] text-muted">Filling required fields...</p>
+</div>
+</div>
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-muted text-sm mt-0.5">radio_button_unchecked</span>
+<div>
+<p class="text-xs text-muted font-mono">OU Policy Check</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Template Info -->
+<div class="bg-surface-highlight border border-border rounded p-4 opacity-70">
+<h4 class="text-xs font-mono text-muted uppercase mb-2">Active Template</h4>
+<div class="bg-background-dark p-2 rounded border border-border mb-2">
+<code class="text-[10px] text-primary font-mono block">TEMPLATE_ID: "STD_USER_V2"</code>
+</div>
+<p class="text-[10px] text-muted leading-relaxed">
+                                Standard user provisioning applies default GPO policies for internet access and email retention.
+                            </p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

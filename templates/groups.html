@@ -1,0 +1,110 @@
+{% extends 'layout.html' %}
+
+{% block title %}Users & Groups // Modern Ops{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-8">
+  <!-- Header Section -->
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-2 pb-6 border-b border-border">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <span class="text-primary text-[10px] font-mono tracking-[0.2em] uppercase">directory_services // search</span>
+        <span class="h-px w-8 bg-primary/30"></span>
+      </div>
+      <h2 class="font-display text-3xl font-bold text-white tracking-tight">Users & Groups</h2>
+      <p class="text-muted mt-2 font-mono text-xs">Search and manage directory objects in the Habilitados HML container.
+      </p>
+    </div>
+    <div class="flex items-center gap-3">
+      <span
+        class="text-[10px] font-mono text-muted uppercase tracking-widest bg-surface px-3 py-1.5 rounded border border-border">
+        Base_OU: .../Habilitados HML
+      </span>
+    </div>
+  </div>
+
+  <!-- Search Section -->
+  <div class="w-full flex flex-col gap-2 relative z-10 group">
+    <form action="{{ url_for('groups') }}" method="GET" class="relative w-full">
+      <div
+        class="absolute left-5 top-1/2 -translate-y-1/2 text-primary font-mono text-lg select-none pointer-events-none">
+        &gt;
+      </div>
+      <input type="text" name="q" value="{{ query }}" autofocus
+        class="w-full bg-surface border border-border text-text-main font-mono text-lg py-5 pl-10 pr-32 rounded focus:ring-0 focus:border-primary focus:shadow-glow transition-all placeholder:text-text-muted/30"
+        placeholder="Search users by name, username or CN...">
+      <div class="absolute right-4 top-1/2 -translate-y-1/2 flex gap-2">
+        <button type="submit"
+          class="bg-primary/10 border border-primary/30 hover:border-primary text-primary px-4 py-2 rounded text-[10px] font-mono uppercase tracking-widest transition-all">
+          EXECUTE_QUERY
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Results Table -->
+  <div class="bg-surface border border-border rounded-lg overflow-hidden shadow-2xl relative">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-surface-highlight/50 border-b border-border">
+            <th class="px-6 py-4 text-[10px] font-mono text-muted uppercase tracking-widest">Display Name</th>
+            <th class="px-6 py-4 text-[10px] font-mono text-muted uppercase tracking-widest">Username</th>
+            <th class="px-6 py-4 text-[10px] font-mono text-muted uppercase tracking-widest">Title / Department</th>
+            <th class="px-6 py-4 text-[10px] font-mono text-muted uppercase tracking-widest text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-border/50">
+          {% if results %}
+          {% for user in results %}
+          <tr class="hover:bg-primary/5 transition-colors group">
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div
+                  class="size-8 rounded bg-surface-highlight border border-border flex items-center justify-center text-primary group-hover:border-primary/50 transition-colors">
+                  <span class="material-symbols-outlined text-sm">person</span>
+                </div>
+                <span class="text-sm font-medium text-white">{{ user.display_name }}</span>
+              </div>
+            </td>
+            <td class="px-6 py-4 font-mono text-xs text-primary/80">{{ user.username }}</td>
+            <td class="px-6 py-4">
+              <span class="text-xs text-muted">{{ user.title or 'N/A' }}</span>
+            </td>
+            <td class="px-6 py-4 text-right">
+              <div class="flex justify-end gap-2">
+                <a href="{{ url_for('user_profile', username=user.username) }}" title="View Data"
+                  class="p-2 text-muted hover:text-white transition-colors">
+                  <span class="material-symbols-outlined text-sm">visibility</span>
+                </a>
+                <button title="Reset Password" class="p-2 text-muted hover:text-error transition-colors">
+                  <span class="material-symbols-outlined text-sm">lock_reset</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+          {% else %}
+          <tr>
+            <td colspan="4" class="px-6 py-20 text-center">
+              {% if query %}
+              <div class="flex flex-col items-center gap-4">
+                <span class="material-symbols-outlined text-4xl text-muted/30">search_off</span>
+                <p class="text-sm text-muted font-mono uppercase">Query returned 0 results.</p>
+              </div>
+              {% else %}
+              <div class="flex flex-col items-center gap-4">
+                <span class="material-symbols-outlined text-4xl text-muted/30">manage_search</span>
+                <p class="text-sm text-muted font-mono uppercase">Enter a query to begin directory search.</p>
+              </div>
+              {% endif %}
+            </td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

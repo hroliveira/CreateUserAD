@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+{% block title %}Audit Logs // Modern Ops{% endblock %}
+{% block content %}
+<div class="flex flex-col items-center justify-center h-[60vh] text-center">
+  <div
+    class="size-24 rounded-full bg-surface-highlight border border-border flex items-center justify-center text-muted mb-6">
+    <span class="material-symbols-outlined text-5xl">history</span>
+  </div>
+  <h2 class="font-display text-4xl font-bold text-white mb-4">Central Audit Repository</h2>
+  <p class="text-muted font-mono text-sm max-w-md">Advanced logging and forensic analysis tools are being integrated.
+    Real-time activity can currently be monitored via the Command Center stream.</p>
+  <div class="mt-8">
+    <a href="{{ url_for('index') }}" class="text-primary hover:underline font-mono text-xs uppercase tracking-widest">[
+      Return_to_Main_Node ]</a>
+  </div>
+</div>
+{% endblock %}

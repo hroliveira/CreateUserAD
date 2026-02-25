@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Modern Ops - Command Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00E5FF",
+                        "background-dark": "#0A0A0C",
+                        "surface": "#161618",
+                        "surface-highlight": "#252529",
+                        "text-main": "#EDEDEF",
+                        "text-muted": "#85858E",
+                        "success": "#22C55E",
+                        "error": "#EF4444",
+                        "border-color": "#333333",
+                    },
+                    fontFamily: {
+                        "sans": ["Inter", "sans-serif"],
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"],
+                    },
+                    boxShadow: {
+                        "glow": "0 0 0 1px rgba(0, 229, 255, 0.3), 0 0 15px rgba(0, 229, 255, 0.1)",
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0A0A0C; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333333; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444444; 
+        }
+        
+        .glass-panel {
+            background: rgba(22, 22, 24, 0.6);
+            backdrop-filter: blur(8px);
+        }
+
+        /* Scanline effect */
+        .scanline {
+            width: 100%;
+            height: 100px;
+            z-index: 10;
+            background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(0, 229, 255, 0.03) 50%, rgba(0,0,0,0) 100%);
+            opacity: 0.1;
+            position: absolute;
+            bottom: 100%;
+            animation: scanline 10s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes scanline {
+            0% {
+                bottom: 100%;
+            }
+            80% {
+                bottom: -100%;
+            }
+            100% {
+                bottom: -100%;
+            }
+        }
+    </style>
+</head>
+<body class="bg-background-dark text-text-main font-sans min-h-screen flex flex-col antialiased selection:bg-primary/30 selection:text-primary overflow-x-hidden relative">
+<!-- Scanline Effect Overlay -->
+<div class="fixed inset-0 pointer-events-none z-50 overflow-hidden h-screen w-screen">
+<div class="scanline"></div>
+</div>
+<!-- Top Navigation Bar -->
+<header class="h-16 border-b border-border-color bg-background-dark/80 backdrop-blur-md sticky top-0 z-40 px-6 flex items-center justify-between">
+<div class="flex items-center gap-3 group cursor-pointer">
+<div class="h-8 w-8 bg-surface-highlight border border-border-color rounded flex items-center justify-center text-primary group-hover:border-primary/50 transition-colors">
+<span class="material-symbols-outlined text-xl">terminal</span>
+</div>
+<h1 class="font-display font-bold text-xl tracking-tight text-white">
+<span class="text-primary mr-1">&gt;_</span>Modern Ops
+            </h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 px-3 py-1.5 rounded border border-border-color bg-surface hover:border-primary/30 transition-colors cursor-pointer">
+<div class="w-2 h-2 rounded-full bg-success shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse"></div>
+<span class="font-mono text-xs text-text-muted">SYSTEM_ONLINE</span>
+</div>
+<div class="h-8 w-[1px] bg-border-color"></div>
+<div class="flex items-center gap-3">
+<div class="text-right hidden sm:block">
+<p class="text-sm font-medium text-white leading-none">Admin_01</p>
+<p class="text-xs text-text-muted font-mono mt-1">Tier 3 Ops</p>
+</div>
+<div class="h-9 w-9 rounded bg-surface-highlight border border-border-color overflow-hidden relative">
+<img alt="User avatar showing a generic silhouette or face" class="h-full w-full object-cover opacity-80 hover:opacity-100 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADaUR7Fjam7cQ-x5xc586t-ZoLTl8DfnpYn88rqeVODDoVTrRcmSH8jNr0t7Q-7inUejHjYc98NV7wxc10RL-Cb70-M5t42LOXK9eFQywKQJhJA4pQkIM_2b_8mgZTzqGj026HkG9rD-W8oQxyhezzuoUAgCkYrXqBnkDRRpYVkZqtctTmeYRjpwOZDsalaGi2aOzEwwhIi66Na3sKQAI-uoUqwfkSSVTWzBTffZcC-wmqjSqdPMnz-rmsitmV8hYR4lvjXT45pLce"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col items-center pt-20 pb-12 px-6 w-full max-w-[1440px] mx-auto">
+<!-- Command Palette Section -->
+<div class="w-full max-w-3xl flex flex-col gap-2 mb-12 relative z-10 group">
+<label class="sr-only" for="command-palette">Command Palette</label>
+<div class="relative w-full">
+<div class="absolute left-5 top-1/2 -translate-y-1/2 text-primary font-mono text-lg select-none pointer-events-none">
+                    &gt;
+                </div>
+<input autofocus="" class="w-full bg-surface border border-border-color text-text-main font-mono text-lg py-5 pl-10 pr-32 rounded focus:ring-0 focus:border-primary focus:shadow-glow transition-all placeholder:text-text-muted/50" id="command-palette" placeholder="Search users, groups, or type a command..." type="text"/>
+<div class="absolute right-4 top-1/2 -translate-y-1/2 flex gap-2 pointer-events-none">
+<kbd class="hidden sm:inline-flex items-center gap-1 px-2 py-1 bg-surface-highlight border border-border-color rounded text-[10px] font-mono text-text-muted font-bold tracking-wider">
+                        CMD + K
+                    </kbd>
+</div>
+</div>
+<div class="flex justify-between px-1">
+<p class="text-xs text-text-muted font-mono">Try "Reset password jsmith" or "Unlock user"</p>
+<div class="flex gap-4 text-xs font-mono text-text-muted">
+<span class="hover:text-primary cursor-pointer transition-colors">[H]istory</span>
+<span class="hover:text-primary cursor-pointer transition-colors">[D]ocs</span>
+</div>
+</div>
+</div>
+<!-- Dashboard Grid -->
+<div class="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+<!-- Stats Column (Left) -->
+<div class="lg:col-span-12 xl:col-span-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Stat Card 1: Critical -->
+<div class="bg-surface border border-border-color p-5 rounded hover:border-error/50 transition-colors group relative overflow-hidden">
+<div class="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
+<span class="material-symbols-outlined text-4xl text-error">lock_person</span>
+</div>
+<p class="text-text-muted text-xs font-mono uppercase tracking-wider mb-2">Locked Accounts</p>
+<div class="flex items-baseline gap-2">
+<span class="font-display font-bold text-4xl text-error drop-shadow-[0_0_8px_rgba(239,68,68,0.4)]">3</span>
+<span class="text-xs text-error/80 font-mono">ACTION REQ</span>
+</div>
+<div class="mt-4 pt-3 border-t border-border-color/50 flex items-center justify-between">
+<span class="text-xs text-text-muted">Since 08:00 AM</span>
+<button class="text-xs text-primary hover:text-white hover:underline font-mono">VIEW LIST &gt;</button>
+</div>
+</div>
+<!-- Stat Card 2: Warning -->
+<div class="bg-surface border border-border-color p-5 rounded hover:border-yellow-500/50 transition-colors group relative overflow-hidden">
+<div class="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
+<span class="material-symbols-outlined text-4xl text-yellow-500">key_off</span>
+</div>
+<p class="text-text-muted text-xs font-mono uppercase tracking-wider mb-2">Pwd Expires &lt; 7d</p>
+<div class="flex items-baseline gap-2">
+<span class="font-display font-bold text-4xl text-yellow-500">12</span>
+<span class="text-xs text-yellow-500/80 font-mono">WARNING</span>
+</div>
+<div class="mt-4 pt-3 border-t border-border-color/50 flex items-center justify-between">
+<span class="text-xs text-text-muted">Check policy</span>
+<button class="text-xs text-primary hover:text-white hover:underline font-mono">NOTIFY ALL &gt;</button>
+</div>
+</div>
+<!-- Stat Card 3: Neutral/Good -->
+<div class="bg-surface border border-border-color p-5 rounded hover:border-primary/30 transition-colors group relative overflow-hidden">
+<div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-30 transition-opacity">
+<span class="material-symbols-outlined text-4xl text-white">sync_problem</span>
+</div>
+<p class="text-text-muted text-xs font-mono uppercase tracking-wider mb-2">Recent Failures</p>
+<div class="flex items-baseline gap-2">
+<span class="font-display font-bold text-4xl text-text-main">0</span>
+<span class="text-xs text-success font-mono">OPTIMAL</span>
+</div>
+<div class="mt-4 pt-3 border-t border-border-color/50 flex items-center justify-between">
+<span class="text-xs text-text-muted">Last 24 hours</span>
+<button class="text-xs text-text-muted hover:text-white hover:underline font-mono">LOGS &gt;</button>
+</div>
+</div>
+</div>
+<!-- Activity Feed (Right/Bottom) -->
+<div class="lg:col-span-12 xl:col-span-4 flex flex-col h-full min-h-[300px]">
+<div class="flex items-center justify-between mb-3 px-1">
+<h2 class="text-sm font-display font-bold text-text-main tracking-wide">SYSTEM_LOGS</h2>
+<div class="flex gap-2">
+<span class="h-2 w-2 rounded-full bg-primary/50 animate-pulse"></span>
+<span class="text-[10px] font-mono text-primary uppercase">Live Stream</span>
+</div>
+</div>
+<div class="flex-1 bg-black border border-border-color rounded p-4 font-mono text-xs overflow-hidden relative">
+<!-- Terminal Scanline cosmetic inside the log box -->
+<div class="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-0 pointer-events-none bg-[length:100%_2px,3px_100%]"></div>
+<div class="relative z-10 flex flex-col gap-3 h-full overflow-y-auto pr-2 custom-scrollbar">
+<!-- Log Item 1 -->
+<div class="flex gap-3 text-text-muted hover:text-text-main transition-colors group cursor-default border-l-2 border-transparent hover:border-primary pl-2">
+<span class="text-text-muted/50 whitespace-nowrap">[14:02:22]</span>
+<div class="flex flex-col">
+<span class="text-primary font-bold">RESET_PASS <span class="text-text-muted font-normal">::</span> <span class="text-white">jsmith</span></span>
+<span class="text-success mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[10px]">check</span> SUCCESS (140ms)
+                                </span>
+</div>
+</div>
+<!-- Log Item 2 -->
+<div class="flex gap-3 text-text-muted hover:text-text-main transition-colors group cursor-default border-l-2 border-transparent hover:border-primary pl-2">
+<span class="text-text-muted/50 whitespace-nowrap">[13:58:10]</span>
+<div class="flex flex-col">
+<span class="text-primary font-bold">GRP_ADD <span class="text-text-muted font-normal">::</span> <span class="text-white">mdoe</span></span>
+<span class="text-success mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[10px]">check</span> SUCCESS (82ms)
+                                </span>
+</div>
+</div>
+<!-- Log Item 3 -->
+<div class="flex gap-3 text-text-muted hover:text-text-main transition-colors group cursor-default border-l-2 border-transparent hover:border-primary pl-2">
+<span class="text-text-muted/50 whitespace-nowrap">[13:45:00]</span>
+<div class="flex flex-col">
+<span class="text-yellow-500 font-bold">UNLOCK <span class="text-text-muted font-normal">::</span> <span class="text-white">bwayne</span></span>
+<span class="text-text-muted mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[10px]">hourglass_empty</span> PENDING APPROVAL...
+                                </span>
+</div>
+</div>
+<!-- Log Item 4 -->
+<div class="flex gap-3 text-text-muted hover:text-text-main transition-colors group cursor-default border-l-2 border-transparent hover:border-primary pl-2 opacity-60">
+<span class="text-text-muted/50 whitespace-nowrap">[13:30:15]</span>
+<div class="flex flex-col">
+<span class="text-primary font-bold">PROVISION <span class="text-text-muted font-normal">::</span> <span class="text-white">new_hire_04</span></span>
+<span class="text-success mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[10px]">check</span> SUCCESS (1.2s)
+                                </span>
+</div>
+</div>
+<!-- Log Item 5 -->
+<div class="flex gap-3 text-text-muted hover:text-text-main transition-colors group cursor-default border-l-2 border-transparent hover:border-primary pl-2 opacity-40">
+<span class="text-text-muted/50 whitespace-nowrap">[13:15:42]</span>
+<div class="flex flex-col">
+<span class="text-error font-bold">AUTH_FAIL <span class="text-text-muted font-normal">::</span> <span class="text-white">unknown_ip</span></span>
+<span class="text-error mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[10px]">close</span> BLOCKED
+                                </span>
+</div>
+</div>
+<!-- Typing Cursor -->
+<div class="mt-2 animate-pulse text-primary">_</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Access / Shortcuts Footer -->
+<div class="fixed bottom-0 left-0 w-full p-4 border-t border-border-color bg-background-dark/95 backdrop-blur z-30 hidden lg:block">
+<div class="max-w-[1440px] mx-auto px-6 flex justify-between items-center text-xs font-mono text-text-muted">
+<div class="flex gap-6">
+<div class="flex items-center gap-2 group cursor-pointer hover:text-text-main">
+<span class="border border-border-color bg-surface px-1.5 py-0.5 rounded text-[10px] group-hover:border-primary/50 transition-colors">N</span>
+<span>New User</span>
+</div>
+<div class="flex items-center gap-2 group cursor-pointer hover:text-text-main">
+<span class="border border-border-color bg-surface px-1.5 py-0.5 rounded text-[10px] group-hover:border-primary/50 transition-colors">G</span>
+<span>Groups</span>
+</div>
+<div class="flex items-center gap-2 group cursor-pointer hover:text-text-main">
+<span class="border border-border-color bg-surface px-1.5 py-0.5 rounded text-[10px] group-hover:border-primary/50 transition-colors">A</span>
+<span>Audit Log</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="h-1.5 w-1.5 rounded-full bg-success"></span>
+<span>AD Connection: Stable (12ms)</span>
+</div>
+</div>
+</div>
+</main>
+</body></html>

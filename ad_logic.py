@@ -32,7 +32,7 @@ def get_connection():
         raise Exception(f"Falha na conexão com o servidor AD: {str(e)}")
 
 
-def create_ad_user(first_name, last_name, username, password, profile_key):
+def create_ad_user(first_name, last_name, username, password, profile_key, **kwargs):
     """
     Cria um usuário no AD, define senha, ativa conta e adiciona a grupos.
     """
@@ -59,7 +59,11 @@ def create_ad_user(first_name, last_name, username, password, profile_key):
             "displayName": display_name,
             "sAMAccountName": username,
             "userPrincipalName": user_principal_name,
-            "userAccountControl": 512,  # Normal Account (Inicia desabilitada até ter senha em alguns casos, mas 512 é o alvo)
+            "userAccountControl": 512,
+            "title": kwargs.get("job_title", ""),
+            "department": kwargs.get("department", ""),
+            "physicalDeliveryOfficeName": kwargs.get("office_location", ""),
+            "employeeID": kwargs.get("employee_id", ""),
         }
 
         logger.info(f"Tentando criar usuário: {user_dn}")
@@ -105,10 +109,226 @@ def create_ad_user(first_name, last_name, username, password, profile_key):
             conn.unbind()
 
 
+def user_exists(username):
+    """Verifica se um usuário já existe no AD pelo sAMAccountName."""
+    conn = None
+    try:
+        conn = get_connection()
+        search_filter = f"(&(objectClass=user)(sAMAccountName={username}))"
+        conn.search(Config.AD_BASE_DN, search_filter, attributes=["sAMAccountName"])
+        return len(conn.entries) > 0
+    except Exception as e:
+        logger.error(f"Erro ao verificar existência de usuário {username}: {str(e)}")
+        return False
+    finally:
+        if conn:
+            conn.unbind()
+
+
+def search_users(query):
+    """Pesquisa usuários no OU configurado."""
+    conn = None
+    try:
+        conn = get_connection()
+        # Filtro para buscar usuários que combinam com o query no nome ou username
+        search_filter = f"(&(objectClass=user)(|(sAMAccountName=*{query}*)(displayName=*{query}*)(cn=*{query}*)))"
+
+        # A OU para pesquisa fornecida pelo usuário
+        search_base = "OU=Habilitados HML,OU=Restritos,OU=Usuarios,OU=ReisAdv,DC=reisadv,DC=com,DC=br"
+
+        conn.search(
+            search_base,
+            search_filter,
+            search_scope=SUBTREE,
+            attributes=[
+                "sAMAccountName",
+                "displayName",
+                "distinguishedName",
+                "mail",
+                "title",
+            ],
+        )
+
+        results = []
+        for entry in conn.entries:
+            results.append(
+                {
+                    "username": str(entry.sAMAccountName),
+                    "display_name": (
+                        str(entry.displayName)
+                        if hasattr(entry, "displayName")
+                        else str(entry.sAMAccountName)
+                    ),
+                    "dn": str(entry.distinguishedName),
+                    "mail": str(entry.mail) if hasattr(entry, "mail") else "",
+                    "title": str(entry.title) if hasattr(entry, "title") else "",
+                }
+            )
+        return results
+    except Exception as e:
+        logger.error(f"Erro ao pesquisar usuários com query '{query}': {str(e)}")
+        return []
+    finally:
+        if conn:
+            conn.unbind()
+
+
+def get_user_details(username):
+    """Retorna detalhes completos de um usuário, incluindo grupos e atributos estendidos."""
+    conn = None
+    try:
+        conn = get_connection()
+        # Busca o usuário
+        search_filter = f"(&(objectClass=user)(sAMAccountName={username}))"
+        attributes = [
+            "sAMAccountName",
+            "displayName",
+            "mail",
+            "title",
+            "department",
+            "memberOf",
+            "distinguishedName",
+            "whenCreated",
+            "lastLogon",
+            "description",
+            "manager",
+            "employeeID",
+            "physicalDeliveryOfficeName",
+            "badPwdCount",
+            "userAccountControl",
+            "lockoutTime",
+            "objectGUID",
+        ]
+        conn.search(Config.AD_BASE_DN, search_filter, attributes=attributes)
+
+        if len(conn.entries) == 0:
+            return None
+
+        entry = conn.entries[0]
+
+        # Processa grupos
+        groups = []
+        if hasattr(entry, "memberOf"):
+            # memberOf can be a string or a list
+            member_of = entry.memberOf.value
+            if member_of:
+                if isinstance(member_of, str):
+                    member_of = [member_of]
+                for group_dn in member_of:
+                    cn = str(group_dn).split(",")[0].replace("CN=", "")
+                    groups.append(cn)
+
+        # Tenta pegar o grupo primário (ex: Domain Users)
+        # O primaryGroupID é o RID do grupo. O Domain Users é 513 por padrão.
+        if "Domain Users" not in groups:
+            groups.append("Domain Users")  # Fallback comum em AD
+
+        # Verifica status (Bloqueado/Desativado)
+        uac = 512
+        if (
+            hasattr(entry, "userAccountControl")
+            and entry.userAccountControl.value is not None
+        ):
+            uac = int(entry.userAccountControl.value)
+        is_disabled = bool(uac & 2)
+
+        lockout_time = 0
+        if hasattr(entry, "lockoutTime") and entry.lockoutTime.value is not None:
+            try:
+                lockout_time = int(entry.lockoutTime.value)
+            except:
+                lockout_time = 0
+        is_locked = lockout_time > 0
+
+        # Formata Manager (extrai CN)
+        manager_cn = "N/A"
+        if hasattr(entry, "manager") and entry.manager.value is not None:
+            manager_cn = str(entry.manager.value).split(",")[0].replace("CN=", "")
+
+        import uuid
+
+        guid = "N/A"
+        if hasattr(entry, "objectGUID") and entry.objectGUID.value is not None:
+            try:
+                guid_bytes = entry.objectGUID.value
+                if isinstance(guid_bytes, bytes) and len(guid_bytes) == 16:
+                    guid = str(uuid.UUID(bytes=guid_bytes))
+                else:
+                    guid = str(guid_bytes)  # Fallback para o valor bruto
+            except Exception as uuid_err:
+                logger.warning(
+                    f"Erro ao converter GUID para {username}: {str(uuid_err)}"
+                )
+                guid = "N/A"
+
+        return {
+            "username": str(entry.sAMAccountName),
+            "display_name": (
+                str(entry.displayName)
+                if hasattr(entry, "displayName") and entry.displayName.value
+                else str(entry.sAMAccountName)
+            ),
+            "mail": (
+                str(entry.mail)
+                if hasattr(entry, "mail") and entry.mail.value
+                else "N/A"
+            ),
+            "title": (
+                str(entry.title)
+                if hasattr(entry, "title") and entry.title.value
+                else "N/A"
+            ),
+            "department": (
+                str(entry.department)
+                if hasattr(entry, "department") and entry.department.value
+                else "N/A"
+            ),
+            "office": (
+                str(entry.physicalDeliveryOfficeName)
+                if hasattr(entry, "physicalDeliveryOfficeName")
+                and entry.physicalDeliveryOfficeName.value
+                else "N/A"
+            ),
+            "description": (
+                str(entry.description)
+                if hasattr(entry, "description") and entry.description.value
+                else "N/A"
+            ),
+            "employee_id": (
+                str(entry.employeeID)
+                if hasattr(entry, "employeeID") and entry.employeeID.value
+                else "N/A"
+            ),
+            "manager": manager_cn,
+            "bad_pwd_count": (
+                int(entry.badPwdCount.value)
+                if hasattr(entry, "badPwdCount") and entry.badPwdCount.value is not None
+                else 0
+            ),
+            "is_disabled": is_disabled,
+            "is_locked": is_locked,
+            "dn": str(entry.distinguishedName),
+            "guid": guid,
+            "groups": groups,
+            "created": (
+                str(entry.whenCreated) if hasattr(entry, "whenCreated") else "N/A"
+            ),
+            "last_logon": (
+                str(entry.lastLogon) if hasattr(entry, "lastLogon") else "N/A"
+            ),
+        }
+    except Exception as e:
+        logger.error(f"Erro ao obter detalhes de {username}: {str(e)}")
+        return None
+    finally:
+        if conn:
+            conn.unbind()
+
+
 def authenticate_user(username, password):
     """
-    Valida as credenciais do usuário diretamente no AD via BIND.
-    Retorna True se autenticado, False caso contrário.
+    Valida as credenciais do usuário diretamente no AD via BIND e verifica a OU.
+    Retorna True se autenticado e na OU permitida, False caso contrário.
     """
     try:
         # Prepara TLS para conexão segura (LDAPS)
@@ -131,6 +351,21 @@ def authenticate_user(username, password):
             authentication="SIMPLE",
             auto_bind=True,
         )
+
+        # Se chegou aqui, a senha está correta. Agora vamos verificar a OU.
+        if Config.ALLOWED_LOGIN_OU:
+            # Busca o DN do usuário autenticado
+            conn.search(
+                Config.ALLOWED_LOGIN_OU,
+                f"(sAMAccountName={username})",
+                search_scope=SUBTREE,
+            )
+            if len(conn.entries) == 0:
+                logger.warning(
+                    f"Usuário {username} autenticado mas não está na OU permitida."
+                )
+                conn.unbind()
+                return False
 
         logger.info(f"Autenticação bem-sucedida para o usuário: {username}")
         conn.unbind()

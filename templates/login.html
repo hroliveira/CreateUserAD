@@ -1,54 +1,62 @@
 {% extends 'layout.html' %}
 
+{% block title %}Authentication // Modern Ops{% endblock %}
+
 {% block login_content %}
-<form action="/login" method="POST" id="loginForm">
-  <!-- Seção de Avatar/Logo -->
-  <div class="d-flex align-items-center mb-4">
-    <div class="user-avatar-container">
-      <svg class="user-avatar-svg" viewBox="0 0 24 24">
-        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z"></path>
-        <path d="M12 14c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
-      </svg>
-    </div>
-    <div>
-      <div class="info-text">Authentication Required</div>
-      <div class="text-white" style="font-size: 0.95rem;">AD User Automation Portal</div>
-    </div>
+<div class="glass-panel p-8 rounded-lg shadow-2xl relative overflow-hidden group">
+  <!-- Decorative border glow -->
+  <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50">
   </div>
 
-  <hr style="border-color: var(--border-color); margin-bottom: 25px;">
+  <div class="flex flex-col items-center mb-8">
+    <div
+      class="size-16 rounded-full bg-surface-highlight border border-border flex items-center justify-center text-primary mb-4 shadow-glow group-hover:scale-110 transition-transform duration-500">
+      <span class="material-symbols-outlined text-4xl">fingerprint</span>
+    </div>
+    <h2 class="font-display text-2xl font-bold text-white tracking-tight">System Authentication</h2>
+    <p class="text-xs font-mono text-muted mt-2 tracking-widest uppercase">identity_verify // login.sys</p>
+  </div>
 
-  <!-- Login Form -->
-  <div class="row g-3 mb-4">
-    <div class="col-12">
-      <div class="row align-items-center mb-3">
-        <div class="col-4 text-end pe-4">
-          <label for="username" class="form-label">Username:</label>
+  <form action="/login" method="POST" class="space-y-6">
+    <div class="space-y-2">
+      <label class="block text-[10px] font-mono text-muted uppercase tracking-widest ml-1">Access_ID (Username)</label>
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted">
+          <span class="material-symbols-outlined text-lg">alternate_email</span>
         </div>
-        <div class="col-8">
-          <input type="text" class="form-control" id="username" name="username" required placeholder="admin.user">
-        </div>
-      </div>
-
-      <div class="row align-items-center mb-3">
-        <div class="col-4 text-end pe-4">
-          <label for="password" class="form-label">Password:</label>
-        </div>
-        <div class="col-8">
-          <input type="password" class="form-control" id="password" name="password" required>
-        </div>
+        <input type="text" name="username" required
+          class="w-full bg-background-dark/50 border border-border rounded text-white px-4 py-3 pl-10 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-glow transition-all placeholder-muted/30 font-mono text-sm"
+          placeholder="user.name">
       </div>
     </div>
-  </div>
 
-  <div class="text-center mt-3 text-muted">
-    <small>Use suas credenciais do domínio para acessar a ferramenta.</small>
-  </div>
-</form>
-{% endblock %}
+    <div class="space-y-2">
+      <label class="block text-[10px] font-mono text-muted uppercase tracking-widest ml-1">Security_Key
+        (Password)</label>
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted">
+          <span class="material-symbols-outlined text-lg">lock</span>
+        </div>
+        <input type="password" name="password" required
+          class="w-full bg-background-dark/50 border border-border rounded text-white px-4 py-3 pl-10 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-glow transition-all placeholder-muted/30 font-mono text-sm"
+          placeholder="************">
+      </div>
+    </div>
 
-{% block login_footer %}
-<div class="ad-footer">
-  <button type="submit" form="loginForm" class="btn-ad primary">Logon</button>
+    <div class="pt-2">
+      <button type="submit"
+        class="w-full bg-primary/10 border border-primary text-primary hover:bg-primary hover:text-background-dark px-6 py-3 rounded text-sm font-bold tracking-widest transition-all shadow-[0_0_15px_rgba(13,223,242,0.1)] hover:shadow-[0_0_20px_rgba(13,223,242,0.4)] flex items-center justify-center gap-3 font-mono group">
+        INITIATE_SESSION
+        <span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">login</span>
+      </button>
+    </div>
+  </form>
+
+  <div class="mt-8 pt-6 border-t border-border/50 text-center">
+    <p class="text-[10px] font-mono text-muted leading-relaxed uppercase tracking-tighter">
+      Authorized Personnel Only. <br>
+      Multi-factor authentication may be required.
+    </p>
+  </div>
 </div>
 {% endblock %}
