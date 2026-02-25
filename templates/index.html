@@ -12,8 +12,7 @@
     </div>
     <div>
       <div class="info-text">Create in:</div>
-      <div class="text-white" style="font-size: 0.95rem;">{{ config.AD_BASE_DN.replace('DC=', '').replace(',', '.') }}/
-      </div>
+      <div class="text-white" style="font-size: 0.95rem;">{{ config.AD_DOMAIN }}/</div>
     </div>
   </div>
 
@@ -68,7 +67,7 @@
         </div>
         <div class="col-5">
           <div class="domain-badge">
-            <span>@{{ config.AD_BASE_DN.replace('DC=', '').replace(',', '.') }}</span>
+            <span>@{{ config.AD_DOMAIN }}</span>
             <span style="font-size: 0.6rem; color: var(--accent-cyan);">▼</span>
           </div>
         </div>
