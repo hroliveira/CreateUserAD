@@ -1,5 +1,8 @@
 from ldap3 import Server, Connection, ALL, SUBTREE, MODIFY_REPLACE, Tls
+from ldap3.utils.conv import escape_filter_chars
 import ssl
+import datetime
+import uuid
 from config import Config
 from logger_config import logger
 
@@ -114,7 +117,9 @@ def user_exists(username):
     conn = None
     try:
         conn = get_connection()
-        search_filter = f"(&(objectClass=user)(sAMAccountName={username}))"
+        # Higieniza o username para evitar LDAP Injection
+        safe_username = escape_filter_chars(username)
+        search_filter = f"(&(objectClass=user)(sAMAccountName={safe_username}))"
         conn.search(Config.AD_BASE_DN, search_filter, attributes=["sAMAccountName"])
         return len(conn.entries) > 0
     except Exception as e:
@@ -130,8 +135,10 @@ def search_users(query):
     conn = None
     try:
         conn = get_connection()
+        # Higieniza o query para evitar LDAP Injection
+        safe_query = escape_filter_chars(query)
         # Filtro para buscar usuários que combinam com o query no nome ou username
-        search_filter = f"(&(objectClass=user)(|(sAMAccountName=*{query}*)(displayName=*{query}*)(cn=*{query}*)))"
+        search_filter = f"(&(objectClass=user)(|(sAMAccountName=*{safe_query}*)(displayName=*{safe_query}*)(cn=*{safe_query}*)))"
 
         # A OU para pesquisa fornecida pelo usuário
         search_base = "OU=Habilitados HML,OU=Restritos,OU=Usuarios,OU=ReisAdv,DC=reisadv,DC=com,DC=br"
@@ -181,8 +188,10 @@ def get_user_details(username):
         # Determina o Root DN para busca global
         root_dn = ",".join([f"DC={p}" for p in Config.AD_DOMAIN.split(".")])
 
+        # Higieniza o username para evitar LDAP Injection
+        safe_username = escape_filter_chars(username)
         # Busca o usuário em todo o domínio
-        search_filter = f"(&(objectClass=user)(sAMAccountName={username}))"
+        search_filter = f"(&(objectClass=user)(sAMAccountName={safe_username}))"
         attributes = [
             "sAMAccountName",
             "displayName",
@@ -282,22 +291,46 @@ def get_user_details(username):
         if hasattr(entry, "manager") and entry.manager.value is not None:
             manager_cn = str(entry.manager.value).split(",")[0].replace("CN=", "")
 
-        import uuid
-        import datetime
-
         def ad_timestamp_to_datetime(val):
-            if not val or val == 0 or str(val) == "0":
-                return "N/A"
+            """Converte timestamp do AD (ou objeto datetime) para string formatada."""
+            # Valores que indicam que a data nunca foi definida ou é o início da época AD
+            if (
+                not val
+                or val == 0
+                or str(val) == "0"
+                or str(val).startswith("1601-01-01")
+            ):
+                return "Nunca"
+
+            # Se já for um objeto datetime
+            if isinstance(val, datetime.datetime):
+                if val.year <= 1601:
+                    return "Nunca"
+                return val.strftime("%d/%m/%Y %H:%M:%S")
+
             try:
+                # Se for uma representação de data em string formatada do ldap3
+                val_str = str(val)
+                if "-" in val_str and ":" in val_str:
+                    if val_str.startswith("1601-01-01"):
+                        return "Nunca"
+                    return val_str
+
+                # Tenta converter para int (AD timestamp: 100ns desde 1601)
+                val_int = int(val)
+                if val_int <= 0:
+                    return "Nunca"
+
                 # AD timestamp is 100-nanosecond intervals since Jan 1, 1601
-                # We convert to seconds for datetime
-                seconds = int(val) / 10000000
+                seconds = val_int / 10000000
                 dt = datetime.datetime(1601, 1, 1) + datetime.timedelta(seconds=seconds)
-                # O net user usa o formato local DD/MM/YYYY
+
+                if dt.year <= 1601:
+                    return "Nunca"
                 return dt.strftime("%d/%m/%Y %H:%M:%S")
             except Exception as e:
-                logger.warning(f"Erro ao converter timestamp AD {val}: {str(e)}")
-                return "N/A"
+                # Se falhar a conversão numérica, retornamos Nunca apenas se for zero/falso
+                return "Nunca" if not val or str(val) == "0" else "N/A"
 
         guid = "N/A"
         if hasattr(entry, "objectGUID") and entry.objectGUID.value is not None:
@@ -321,16 +354,30 @@ def get_user_details(username):
             else 0
         )
 
-        # Pega o mais recente
-        try:
-            last_logon_raw = max(int(ll_raw or 0), int(lts_raw or 0))
-        except:
-            last_logon_raw = ll_raw or lts_raw or 0
+        # Pega o mais recente de forma segura
+        def get_val_for_max(v):
+            if isinstance(v, datetime.datetime):
+                return v
+            try:
+                val_int = int(v or 0)
+                if val_int <= 0:
+                    return datetime.datetime(1601, 1, 1)
+                return datetime.datetime(1601, 1, 1) + datetime.timedelta(
+                    seconds=val_int / 10000000
+                )
+            except:
+                return datetime.datetime(1601, 1, 1)
+
+        last_logon_raw = max(get_val_for_max(ll_raw), get_val_for_max(lts_raw))
 
         last_logon_fmt = ad_timestamp_to_datetime(last_logon_raw)
 
         # Datas de senha e conta
-        pwd_last_set_raw = entry.pwdLastSet.value if hasattr(entry, "pwdLastSet") else 0
+        pwd_last_set_raw = (
+            entry.pwdLastSet.value
+            if hasattr(entry, "pwdLastSet") and entry.pwdLastSet.value is not None
+            else 0
+        )
         pwd_last_set_fmt = ad_timestamp_to_datetime(pwd_last_set_raw)
 
         # Password Expiry (msDS-UserPasswordExpiryTimeComputed)
@@ -497,7 +544,9 @@ def authenticate_user(username, password):
             tls=tls_config,
         )
 
-        user_principal = f"{username}@{Config.AD_DOMAIN}"
+        # Higieniza o username para evitar LDAP Injection
+        safe_username = escape_filter_chars(username).strip()
+        user_principal = f"{safe_username}@{Config.AD_DOMAIN}"
 
         # Tenta a conexão com as credenciais fornecidas
         conn = Connection(
@@ -515,7 +564,7 @@ def authenticate_user(username, password):
                 # Busca o DN do usuário autenticado dentro de cada OU permitida
                 conn.search(
                     ou,
-                    f"(sAMAccountName={username})",
+                    f"(sAMAccountName={safe_username})",
                     search_scope=SUBTREE,
                 )
                 if len(conn.entries) > 0:

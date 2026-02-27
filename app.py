@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, request, flash, redirect, url_for, session
 from functools import wraps
 from config import Config
@@ -12,8 +13,20 @@ from flask import jsonify
 from email_utils import send_provisioning_email
 from logger_config import logger
 
+from flask_wtf.csrf import CSRFProtect
+
 app = Flask(__name__)
 app.config.from_object(Config)
+
+# Proteção CSRF
+csrf = CSRFProtect(app)
+
+# Configurações de segurança de sessão
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=False,  # Definir como True se usar HTTPS
+)
 
 
 def login_required(f):
@@ -168,6 +181,19 @@ def logout():
     return redirect(url_for("login"))
 
 
+@app.after_request
+def add_security_headers(response):
+    """Adiciona cabeçalhos de segurança em todas as respostas."""
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    # response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline' cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com;"
+    return response
+
+
 if __name__ == "__main__":
     # host="0.0.0.0" permite que outras máquinas na rede acessem o portal pelo IP deste PC
-    app.run(debug=True, host="0.0.0.0", port=8080)
+    # O modo debug deve ser controlado por variável de ambiente em produção
+    debug_mode = os.getenv("FLASK_DEBUG", "True") == "True"
+    app.run(debug=debug_mode, host="0.0.0.0", port=8080)
